@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Londres en ruta</title>
 <meta name="theme-color" content="#0d1530">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -11,72 +12,100 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
-<title>Londres en ruta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..900&family=Figtree:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: app de una pantalla tipo "línea de metro" — cabecera con días, línea de estaciones, tarjeta-postal, barra inferior Anterior/Siguiente */
+/* Layout: app de una pantalla con pestañas inferiores (Ruta · Mapa · Gastos · Info); la Ruta es una "línea de metro" de paradas con tarjeta-postal y botón Siguiente */
 :root{
   --bg:#eef1f6; --surface:#ffffff; --fg:#14182a; --muted:#5b6378; --line:#d9dee8; --chip:#e3e8f1;
-  --ink-strong:#0d1530; --accent:#dc241f; --day:#dc241f;
+  --ink-strong:#0d1530; --accent:#dc241f; --day:#dc241f; --ok:#0f8a6a; --warn:#c96a00; --rain:#2b6fd6;
   --font-display:"Archivo","Arial Narrow",system-ui,sans-serif;
   --font-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --shadow:0 10px 30px -14px rgba(16,24,48,.35);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0b1020; --surface:#151b30; --fg:#e8ecf6; --muted:#9aa3bb; --line:#262e48; --chip:#1f2741; --ink-strong:#ffffff; --shadow:0 10px 30px -14px rgba(0,0,0,.7); color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0b1020; --surface:#151b30; --fg:#e8ecf6; --muted:#9aa3bb; --line:#262e48; --chip:#1f2741; --ink-strong:#ffffff; --shadow:0 10px 30px -14px rgba(0,0,0,.7); color-scheme:dark}
+  --bg:#0b1020; --surface:#151b30; --fg:#e8ecf6; --muted:#9aa3bb; --line:#262e48; --chip:#1f2741; --ink-strong:#ffffff; --ok:#2fbf8f; --warn:#f0a040; --rain:#6aa6ff; --shadow:0 10px 30px -14px rgba(0,0,0,.7); color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1020; --surface:#151b30; --fg:#e8ecf6; --muted:#9aa3bb; --line:#262e48; --chip:#1f2741; --ink-strong:#ffffff; --ok:#2fbf8f; --warn:#f0a040; --rain:#6aa6ff; --shadow:0 10px 30px -14px rgba(0,0,0,.7); color-scheme:dark}
 [hidden]{display:none!important}
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit}
 .app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-inline:16px}
 
 /* cabecera */
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 8px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px 6px}
 .brand{display:flex;align-items:center;gap:10px}
-.roundel{width:30px;height:30px;flex:none;position:relative}
+.roundel{width:28px;height:28px;flex:none;position:relative}
 .roundel i{position:absolute;inset:0;border:6px solid var(--accent);border-radius:50%}
 .roundel b{position:absolute;left:-3px;right:-3px;top:50%;height:8px;margin-top:-4px;background:var(--ink-strong);border-radius:1px}
-.brand h1{font-family:var(--font-display);font-stretch:85%;font-weight:850;font-size:22px;letter-spacing:-.01em;margin:0;color:var(--ink-strong)}
-.brand .sub{font-size:12px;color:var(--muted);margin-left:auto;text-align:right;line-height:1.2}
-.days{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
-.days button{all:unset;cursor:pointer;text-align:center;padding:7px 4px 8px;border-radius:12px;background:var(--chip);color:var(--fg);border-bottom:4px solid transparent;transition:transform .15s}
-.days button .w{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
-.days button .n{display:block;font-family:var(--font-display);font-weight:800;font-size:20px;line-height:1.1}
+.brand h1{font-family:var(--font-display);font-stretch:85%;font-weight:850;font-size:21px;letter-spacing:-.01em;margin:0;color:var(--ink-strong)}
+.nowbtn{all:unset;cursor:pointer;margin-left:auto;display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px;padding:7px 12px;border-radius:999px;background:var(--ink-strong);color:var(--bg)}
+.nowbtn i{width:8px;height:8px;border-radius:50%;background:#2fdc8a;box-shadow:0 0 0 3px rgba(47,220,138,.25)}
+.count{margin-top:8px;display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 12px;border-radius:12px;background:var(--chip)}
+.count b{color:var(--ink-strong)}
+.count .em{font-size:15px}
+.count.soon{background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+.days{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.days button{all:unset;cursor:pointer;text-align:center;padding:6px 2px 7px;border-radius:12px;background:var(--chip);color:var(--fg);border-bottom:4px solid transparent}
+.days button .w{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.days button .n{display:block;font-family:var(--font-display);font-weight:800;font-size:19px;line-height:1.1}
+.days button .wx{display:block;font-size:11px;color:var(--muted);min-height:15px;font-variant-numeric:tabular-nums}
 .days button[aria-selected="true"]{background:var(--d);color:#fff;border-bottom-color:rgba(0,0,0,.25)}
-.days button[aria-selected="true"] .w{color:rgba(255,255,255,.85)}
-.days button:focus-visible,.navbtn:focus-visible,.act:focus-visible,.stop:focus-visible{outline:3px solid var(--day);outline-offset:2px}
+.days button[aria-selected="true"] .w,.days button[aria-selected="true"] .wx{color:rgba(255,255,255,.88)}
+:is(button,a,input,select):focus-visible{outline:3px solid var(--day);outline-offset:2px}
 
-/* línea de estaciones */
-.lineWrap{overflow-x:auto;scrollbar-width:none;margin-top:10px;padding-block:6px 4px}
+.lineWrap{overflow-x:auto;scrollbar-width:none;margin-top:8px;padding-block:5px 3px}
 .lineWrap::-webkit-scrollbar{display:none}
-.tube{position:relative;display:flex;gap:0;min-width:max-content;padding-inline:4px}
+.tube{position:relative;display:flex;min-width:max-content;padding-inline:4px}
 .tube:before{content:"";position:absolute;left:10px;right:10px;top:50%;height:6px;margin-top:-3px;background:var(--day);border-radius:3px;opacity:.9}
 .stop{all:unset;cursor:pointer;position:relative;width:26px;height:22px;display:grid;place-items:center}
 .stop span{width:12px;height:12px;border-radius:50%;background:var(--surface);border:3px solid var(--day);transition:transform .2s}
 .stop.leg span{width:6px;height:6px;border-width:0;background:rgba(255,255,255,.85)}
 .stop.done span{background:var(--day)}
+.stop.now:after{content:"";position:absolute;bottom:-5px;width:5px;height:5px;border-radius:50%;background:#2fdc8a}
 .stop[aria-current="true"] span{transform:scale(1.55);background:#fff;box-shadow:0 0 0 3px var(--bg)}
-.meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
+.meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-top:2px}
 .meta b{color:var(--fg)}
+.listbtn{all:unset;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--day);white-space:nowrap}
+
+main{flex:1;padding-block:8px 170px}
+.view[hidden]{display:none}
 
 /* tarjeta */
-main{flex:1;padding-block:8px 120px}
 .card{background:var(--surface);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}
 .post{position:relative;aspect-ratio:16/10;max-width:100%;color:#fff;overflow:hidden;background:linear-gradient(160deg,var(--c1),var(--c2))}
 .post svg.scene{position:absolute;inset:0;width:100%;height:100%}
-.post .time{position:absolute;left:14px;top:14px;font-family:var(--font-display);font-weight:800;font-size:15px;background:rgba(0,0,0,.28);backdrop-filter:blur(4px);padding:4px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
-.post .cat{position:absolute;right:14px;top:14px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(255,255,255,.18);padding:5px 10px;border-radius:999px}
-.post .stamp{position:absolute;left:14px;bottom:12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.9;font-weight:600}
-.body{padding:18px 18px 20px}
-.body h2{font-family:var(--font-display);font-stretch:90%;font-weight:850;font-size:27px;line-height:1.05;letter-spacing:-.015em;margin:0;color:var(--ink-strong);text-wrap:balance}
+.post img.photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.post.has-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 35%,transparent 65%,rgba(0,0,0,.45));pointer-events:none}
+.post .time,.post .cat,.post .stamp,.post .wxc{z-index:2}
+.post .time{position:absolute;left:14px;top:14px;font-family:var(--font-display);font-weight:800;font-size:15px;background:rgba(0,0,0,.3);backdrop-filter:blur(4px);padding:4px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
+.post .cat{position:absolute;right:14px;top:14px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(255,255,255,.2);padding:5px 10px;border-radius:999px}
+.post .wxc{position:absolute;right:14px;bottom:12px;font-size:12px;font-weight:700;background:rgba(0,0,0,.3);padding:4px 9px;border-radius:999px}
+.post .stamp{position:absolute;left:14px;bottom:12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.92;font-weight:600}
+.body{padding:16px 18px 20px}
+.titleRow{display:flex;align-items:flex-start;gap:10px}
+.body h2{flex:1;min-width:0;font-family:var(--font-display);font-stretch:90%;font-weight:850;font-size:26px;line-height:1.05;letter-spacing:-.015em;margin:0;color:var(--ink-strong);text-wrap:balance}
+.visit{all:unset;cursor:pointer;flex:none;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:7px 11px;border-radius:999px;border:2px solid var(--line);color:var(--muted)}
+.visit svg{width:15px;height:15px}
+.visit.on{background:var(--ok);border-color:var(--ok);color:#fff}
 .where{margin-top:6px;color:var(--muted);font-size:13px}
 .desc{margin:12px 0 0;font-size:15.5px}
-.tip{margin-top:14px;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--day) 12%,var(--surface));font-size:14px}
-.tip b{color:var(--ink-strong)}
-.warn{background:color-mix(in srgb,#e08a1e 18%,var(--surface))}
-.route{margin-top:14px;display:flex;flex-direction:column;gap:0}
+.box{margin-top:12px;padding:11px 13px;border-radius:14px;font-size:14px}
+.tip{background:color-mix(in srgb,var(--day) 12%,var(--surface))}
+.late{background:color-mix(in srgb,var(--warn) 18%,var(--surface))}
+.late b,.tip b,.planb b{color:var(--ink-strong)}
+.planb{background:color-mix(in srgb,var(--rain) 14%,var(--surface))}
+details.planb summary{cursor:pointer;font-weight:700;list-style:none}
+details.planb summary::-webkit-details-marker{display:none}
+details.planb p{margin:6px 0 0}
+.eat{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.eat h4{margin:0 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.eat a{display:flex;justify-content:space-between;gap:10px;text-decoration:none;color:var(--fg);padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.eat a:last-child{border-bottom:none}
+.eat a span{color:var(--muted);font-size:12.5px;text-align:right}
+.route{margin-top:14px;display:flex;flex-direction:column}
 .rs{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:stretch}
 .rs .rail{display:flex;flex-direction:column;align-items:center}
 .rs .dot{width:14px;height:14px;border-radius:50%;background:var(--surface);border:3.5px solid var(--fg);margin-top:3px;flex:none}
@@ -86,36 +115,93 @@ main{flex:1;padding-block:8px 120px}
 .rs .ln{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;margin:6px 0 2px}
 .rs .di{font-size:12.5px;color:var(--muted);padding-bottom:8px}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
-.act{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:700;font-size:14px;padding:12px;border-radius:14px;background:var(--chip);color:var(--fg)}
+.act{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:700;font-size:14px;padding:12px;border-radius:14px;background:var(--chip);color:var(--fg);border:0;cursor:pointer}
 .act.primary{background:var(--day);color:#fff}
 .act svg{width:18px;height:18px}
 
-/* barra inferior */
-.navbar{position:fixed;left:0;right:0;bottom:0;z-index:6;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 28%)}
-.navin{max-width:520px;margin:0 auto;display:grid;grid-template-columns:56px 1fr 56px;gap:8px}
-.navbtn{all:unset;cursor:pointer;box-sizing:border-box;border-radius:16px;min-height:56px;display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
-.navbtn.next{background:var(--ink-strong);color:var(--bg);justify-content:space-between;padding:8px 14px 8px 16px;gap:10px;min-width:0}
-.navbtn.next .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.75;font-weight:700}
+/* barras inferiores */
+.navbar{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom,0px));z-index:6;padding:12px 16px 8px;background:linear-gradient(transparent,var(--bg) 30%)}
+.navin{max-width:520px;margin:0 auto;display:grid;grid-template-columns:52px 1fr 52px;gap:8px}
+.navbtn{all:unset;cursor:pointer;box-sizing:border-box;border-radius:16px;min-height:52px;display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+.navbtn.next{background:var(--ink-strong);color:var(--bg);justify-content:space-between;padding:6px 14px 6px 16px;gap:10px;min-width:0}
+.navbtn.next .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.75;font-weight:700}
 .navbtn.next .nm{font-family:var(--font-display);font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .navbtn.next .tx{min-width:0;display:flex;flex-direction:column}
 .navbtn[disabled]{opacity:.35;pointer-events:none}
 .navbtn svg{width:22px;height:22px;flex:none}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:7;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabsin{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{all:unset;cursor:pointer;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--muted)}
+.tab svg{width:22px;height:22px}
+.tab[aria-selected="true"]{color:var(--day)}
 
 /* lista del día */
 .sheet{position:fixed;inset:0;z-index:10;background:rgba(5,8,20,.5);display:flex;align-items:flex-end}
 .sheet .panel{background:var(--surface);width:100%;max-width:520px;margin:0 auto;border-radius:22px 22px 0 0;max-height:82%;overflow:auto;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
 .sheet h3{font-family:var(--font-display);font-weight:850;font-size:20px;margin:4px 0 10px;color:var(--ink-strong)}
-.li{all:unset;cursor:pointer;display:grid;grid-template-columns:52px 14px 1fr;gap:10px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--line);width:100%;box-sizing:border-box}
+.li{all:unset;cursor:pointer;display:grid;grid-template-columns:52px 14px 1fr auto;gap:10px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--line);width:100%;box-sizing:border-box}
 .li .t{font-family:var(--font-display);font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
 .li .d{width:12px;height:12px;border-radius:50%;border:3px solid var(--day);background:var(--surface)}
+.li.done .d{background:var(--day)}
 .li.leg .d{border-width:0;background:var(--line)}
 .li .n{font-weight:600;min-width:0}
 .li .n small{display:block;color:var(--muted);font-weight:500;font-size:12px}
+.li .ok{color:var(--ok);font-weight:800}
 .li[aria-current="true"]{background:color-mix(in srgb,var(--day) 12%,transparent);border-radius:10px}
-.listbtn{all:unset;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--day);padding:4px 0}
+
+/* secciones genéricas */
+.sec{background:var(--surface);border-radius:20px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px}
+.sec h3{font-family:var(--font-display);font-weight:850;font-size:19px;margin:0 0 10px;color:var(--ink-strong)}
+.sec h4{margin:12px 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)} .small{font-size:13px}
+
+/* mapa */
+#map{height:calc(100dvh - 330px);min-height:320px;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);background:var(--chip)}
+.mapbar{display:flex;gap:8px;margin-top:10px}
+.mapbar button{flex:1}
+.pin{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font:800 12px var(--font-display);border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.pin.done{opacity:.55}
+.me{width:16px;height:16px;border-radius:50%;background:#2b7cff;border:3px solid #fff;box-shadow:0 0 0 6px rgba(43,124,255,.25)}
+.maplist a{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--fg)}
+.maplist .num{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;font:800 12px var(--font-display);flex:none}
+
+/* gastos */
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:999px;padding:5px 6px 5px 12px;font-weight:600;font-size:14px}
+.pchip button{all:unset;cursor:pointer;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.f{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--muted);min-width:0}
+.f input,.f select{font:inherit;font-size:15px;font-weight:500;color:var(--fg);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 11px;width:100%;box-sizing:border-box;min-width:0}
+.stack{display:flex;flex-direction:column;gap:10px}
+.split{display:flex;flex-wrap:wrap;gap:6px}
+.split label{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
+.btn{all:unset;cursor:pointer;text-align:center;font-weight:800;padding:12px 14px;border-radius:14px;background:var(--ink-strong);color:var(--bg)}
+.btn.sec2{background:var(--chip);color:var(--fg)}
+.exp{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.exp .c{min-width:0}
+.exp .c small{display:block;color:var(--muted);font-size:12px}
+.exp .a{font-weight:800;font-variant-numeric:tabular-nums;text-align:right}
+.exp .a small{display:block;color:var(--muted);font-weight:500;font-size:12px}
+.exp button{all:unset;cursor:pointer;color:var(--muted);padding:4px}
+.bal{display:flex;justify-content:space-between;padding:7px 0;font-variant-numeric:tabular-nums;border-bottom:1px dashed var(--line)}
+.pos{color:var(--ok);font-weight:800}.neg{color:var(--accent);font-weight:800}
+.transfer{padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--ok) 12%,var(--surface));margin-top:6px;font-weight:600}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+
+/* info */
+.addr{font-family:var(--font-display);font-weight:800;font-size:22px;line-height:1.15;color:var(--ink-strong);user-select:all}
+.res{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.res .w{font-family:var(--font-display);font-weight:800;font-size:13px;font-variant-numeric:tabular-nums;color:var(--day)}
+.res .nm{font-weight:700}
+.res input{grid-column:1/-1;font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1.5px dashed var(--line);border-radius:10px;padding:7px 10px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.kv b{font-variant-numeric:tabular-nums;text-align:right}
+.phr{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.phr b{color:var(--ink-strong)}
 .fade{animation:fade .28s ease}
 @keyframes fade{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.fade{animation:none}.stop span{transition:none}}
+.toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--ink-strong);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;z-index:20;font-size:14px}
 </style>
 
 </head>
@@ -125,30 +211,51 @@ main{flex:1;padding-block:8px 120px}
     <div class="brand">
       <div class="roundel" aria-hidden="true"><i></i><b></b></div>
       <h1>Londres en ruta</h1>
-      <div class="sub">9–12 oct 2026<br>Base: Ilford</div>
+      <button class="nowbtn" id="nowBtn" type="button"><i></i>Ahora</button>
     </div>
+    <div class="count" id="count"></div>
     <div class="days" role="tablist" id="days"></div>
-    <div class="lineWrap" id="lineWrap"><div class="tube" id="tube"></div></div>
-    <div class="meta"><span id="dayTitle"></span><button class="listbtn" id="openList" type="button">Ver el día ›</button></div>
+    <div id="routeHead">
+      <div class="lineWrap"><div class="tube" id="tube"></div></div>
+      <div class="meta"><span id="dayTitle"></span><button class="listbtn" id="openList" type="button">Ver el día ›</button></div>
+    </div>
   </header>
-  <main id="main"></main>
+  <main>
+    <section class="view" id="v-ruta"></section>
+    <section class="view" id="v-mapa" hidden>
+      <div id="map"></div>
+      <div class="mapbar"><button class="act primary" id="locate" type="button">📍 Mi ubicación</button><button class="act" id="fitDay" type="button">Ver todo el día</button></div>
+      <p class="small muted" id="mapNote"></p>
+      <div class="sec maplist" id="mapList"></div>
+    </section>
+    <section class="view" id="v-gastos" hidden></section>
+    <section class="view" id="v-info" hidden></section>
+  </main>
 </div>
 
-<nav class="navbar"><div class="navin">
+<nav class="navbar" id="navbar"><div class="navin">
   <button class="navbtn" id="prev" type="button" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
   <button class="navbtn next" id="next" type="button"><span class="tx"><span class="lbl" id="nextLbl">Siguiente</span><span class="nm" id="nextName"></span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
   <button class="navbtn" id="listBtn" type="button" aria-label="Lista del día"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.2" fill="currentColor"/><circle cx="4" cy="12" r="1.2" fill="currentColor"/><circle cx="4" cy="18" r="1.2" fill="currentColor"/></svg></button>
 </div></nav>
 
-<div class="sheet" id="sheet" hidden><div class="panel" id="panel"></div></div>
+<nav class="tabs"><div class="tabsin" role="tablist" id="tabs">
+  <button class="tab" type="button" data-v="ruta" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="6" r="2.5"/><path d="M7.5 18H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h7.5"/></svg>Ruta</button>
+  <button class="tab" type="button" data-v="mapa" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Mapa</button>
+  <button class="tab" type="button" data-v="gastos" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-1-1.5-2.5-2-4-2-2.5 0-4 1.6-4 4v10M6 13h7M6 19h11"/></svg>Gastos</button>
+  <button class="tab" type="button" data-v="info" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Info</button>
+</div></nav>
 
+<div class="sheet" id="sheet" hidden><div class="panel" id="panel"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-/* ---------- líneas de transporte (colores oficiales) ---------- */
+/* ================== datos ================== */
 const LN={eliz:["Elizabeth line","#6950A1","#fff"],central:["Central","#DC241F","#fff"],jubilee:["Jubilee","#868F98","#fff"],
 northern:["Northern","#000","#fff"],picc:["Piccadilly","#003688","#fff"],district:["District","#00782A","#fff"],circle:["Circle / Metropolitan / H&C","#FFD329","#1b1f2a"],
 metro:["Metropolitan","#9B0056","#fff"],victoria:["Victoria","#0098D4","#fff"],lnwr:["Tren London Northwestern","#2E7D5B","#fff"],
 ga:["Tren Greater Anglia","#D70428","#fff"],nx:["Bus National Express","#1d2e52","#fff"],shuttle:["Lanzadera Warner Bros.","#7a4a1d","#fff"],walk:["A pie","",""]};
-
 /* ---------- escenas (categoría → colores + dibujo) ---------- */
 const SC={
  plane:["#3a7bd5","#1d3f8a"], bus:["#2b4c8c","#14254d"], tube:["#6950A1","#2f2160"], hotel:["#5b6b8c","#2c3550"],
@@ -202,8 +309,7 @@ function scene(cat){
   <g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,-4)">${G[cat]||G.tube}</g></svg>`;
 }
 
-/* ---------- itinerario ---------- */
-// tipo: "s" = sitio, "t" = trayecto. route: [["s","Estación"],["eliz","dir. X · 4 paradas"],["walk","13 min"]...]
+
 const DAYS=[
 {w:"Vie",n:9,color:"#DC241F",title:"Río, Westminster y West End",steps:[
  {t:"07:30",c:"plane",k:"t",name:"Vuelo Faro → Stansted",where:"Ryanair · llegada 10:20",desc:"Arranca el viaje. Portugal y Londres tienen la misma hora, así que no hay que tocar el reloj.",tip:"Solo equipaje de mano: salís rápido. Tened el pasaporte a mano para el control."},
@@ -277,83 +383,353 @@ const DAYS=[
 ]}
 ];
 
-/* ---------- estado ---------- */
-let state={d:0,i:0};
-try{const s=JSON.parse(localStorage.getItem("ldn-pos")||"null"); if(s&&DAYS[s.d]&&DAYS[s.d].steps[s.i]) state=s;}catch(e){}
-const h=(location.hash||"").replace("#","");
-if(/^dia[1-4]$/.test(h)) state={d:+h[3]-1,i:0};
+/* Extras por sitio: coordenadas, opcional (saltable), plan B por lluvia y comida cerca */
+const X={
+ "park-hotel-ilford":{ll:[51.5694,0.0703],eat:[["The Great Spoon of Ilford","Wetherspoons · desayunos y pintas baratas","The Great Spoon of Ilford"],["Tesco / Sainsbury's de Ilford","Meal deal para el día","Tesco Ilford"]]},
+ "check-out":{ll:[51.5694,0.0703]},
+ "borough-market":{ll:[51.5055,-0.0910],eat:[["Kappacasein","Toastie de queso fundido","Kappacasein Borough Market"],["Bread Ahead","Donuts rellenos","Bread Ahead Borough Market"],["Padella","Pasta fresca barata (suele haber cola)","Padella Borough"]]},
+ "south-bank":{ll:[51.5076,-0.0994],rain:"Entrad en la <b>Tate Modern</b> (gratis): es enorme, está cubierta y en la planta 10 tiene mirador acristalado. Después, el <b>Southbank Centre</b> también se recorre por dentro.",eat:[["Southbank Centre Food Market","Puestos de street food (vie–dom)","Southbank Centre Food Market"]]},
+ "london-eye":{ll:[51.5033,-0.1196]},
+ "big-ben-y-westminster":{ll:[51.5007,-0.1246]},
+ "st-james-s-park":{ll:[51.5025,-0.1340],opt:1,rain:"Saltad el parque y pasad directos de Westminster a Trafalgar. Entrad en la <b>National Gallery</b> (gratis, cubierta) hasta que pare."},
+ "buckingham-palace":{ll:[51.5014,-0.1419],rain:"Foto rápida y seguid. Si arrecia, refugio en la <b>National Gallery</b> (gratis), en Trafalgar."},
+ "trafalgar-square":{ll:[51.5080,-0.1281],rain:"La <b>National Gallery</b> está en la misma plaza: gratis, con Van Gogh, Turner y Velázquez."},
+ "covent-garden-y-neal-s-yard":{ll:[51.5144,-0.1265],rain:"El mercado de Covent Garden es cubierto y <b>Seven Dials Market</b> es un food hall interior a 5 min.",eat:[["Seven Dials Market","Food hall cubierto, mucha variedad","Seven Dials Market"],["Ben's Cookies","Galletas calientes","Ben's Cookies Covent Garden"]]},
+ "chinatown-y-soho":{ll:[51.5115,-0.1312],eat:[["Bun House","Bollos al vapor","Bun House Chinatown"],["Bunsik","Corn dogs coreanos","Bunsik Soho"],["Four Seasons","Pato asado cantonés","Four Seasons Gerrard Street"],["Kingly Court","Patio con muchos restaurantes","Kingly Court"]]},
+ "piccadilly-circus":{ll:[51.5101,-0.1340]},
+ "lamb-y-flag":{ll:[51.5116,-0.1257],opt:1},
+ "outernet-london":{ll:[51.5162,-0.1307],opt:1},
+ "westminster-de-noche":{ll:[51.5008,-0.1219],rain:"Versión corta: metro a Westminster (desde Piccadilly Circus: Bakerloo a Embankment + District, 1 parada), foto del Big Ben iluminado al salir de la estación y Jubilee de vuelta desde la misma estación."},
+ "casas-de-colores-de-notting-hill":{ll:[51.5180,-0.2040],rain:"Hacedlas rápido y meteos en las <b>galerías cubiertas de antigüedades</b> de Portobello Road."},
+ "portobello-road-market":{ll:[51.5155,-0.2050],rain:"En Portobello hay varias <b>galerías de antigüedades cubiertas</b> a lo largo de la calle. Recorred esas y los cafés.",eat:[["Puestos de Portobello","Street food de sábado","Portobello Road food stalls"],["Gail's Bakery","Bollería y café","Gail's Notting Hill"]]},
+ "the-churchill-arms":{ll:[51.5069,-0.1946],opt:1},
+ "kensington-gardens-y-hyde-park":{ll:[51.5024,-0.1777],rain:"Metro de Notting Hill Gate a South Kensington (Circle/District, 2 paradas). Desde la estación, un <b>túnel peatonal</b> lleva hasta el museo sin mojarse."},
+ "natural-history-museum":{ll:[51.4967,-0.1764],eat:[["Cafés del museo","Rápido sin salir","Natural History Museum cafe"],["Cadenas en South Kensington","Pret, Leon, Itsu junto a la estación","South Kensington station"]]},
+ "boxpark-wembley":{ll:[51.5585,-0.2818],eat:[["Boxpark Wembley","Street food variado","Boxpark Wembley"]]},
+ "mundo-pixar-experience":{ll:[51.5594,-0.2830]},
+ "camden-market":{ll:[51.5415,-0.1466],rain:"El <b>Stables Market</b> es cubierto en gran parte, y en <b>Hawley Wharf</b> hay food halls interiores.",eat:[["Buck Street Market","Contenedores de comida, terraza arriba","Buck Street Market"],["Camden Lock Market","Puestos internacionales","Camden Lock Market"]]},
+ "hansel-y-gretel-y-regent-s-canal":{ll:[51.5410,-0.1455],opt:1,rain:"Tienda sí, canal no: quedaos bajo techo en Camden Lock."},
+ "primrose-hill":{ll:[51.5394,-0.1609],opt:1,rain:"Saltadlo: con nubes bajas no se ve el skyline. Más tiempo en Camden."},
+ "poppies-fish-y-chips":{ll:[51.5404,-0.1446],eat:[["Poppies","Fish & chips","Poppies Camden"]]},
+ "the-hawley-arms":{ll:[51.5407,-0.1449]},
+ "camden-de-noche":{ll:[51.5390,-0.1426],rain:"Bares con música en directo bajo techo en Camden High Street."},
+ "anden-9":{ll:[51.5322,-0.1240],eat:[["Dishoom King's Cross","Desayuno indio: el bacon naan roll es famoso","Dishoom King's Cross"],["Coal Drops Yard","Cafés y tiendas","Coal Drops Yard"]]},
+ "st-pancras":{ll:[51.5308,-0.1260],opt:1},
+ "british-museum":{ll:[51.5194,-0.1270],eat:[["Princess Louise","Pub victoriano en Holborn","Princess Louise pub Holborn"]]},
+ "harrods":{ll:[51.4994,-0.1632],eat:[["Harrods Food Halls","Para mirar (y algún capricho)","Harrods Food Halls"]]},
+ "chelsea-king-s-road":{ll:[51.4875,-0.1680],opt:1,rain:"Entrad en la <b>Saatchi Gallery</b> (Duke of York Square, en King's Road): arte contemporáneo, normalmente gratis.",eat:[["Cadenas de King's Road","Pret, Leon, Gail's…","King's Road Chelsea"]]},
+ "warner-bros-studio-tour":{ll:[51.6903,-0.4182],eat:[["Backlot Café","Dentro del tour, algo caro","Warner Bros Studio Tour Backlot Cafe"]]},
+ "the-anchor-bankside":{ll:[51.5076,-0.0939],eat:[["The Anchor Bankside","Pub junto al río","The Anchor Bankside"]]},
+ "tower-bridge-iluminado":{ll:[51.5055,-0.0754],rain:"Foto rápida desde More London y metro en London Bridge (Northern hasta Bank y Elizabeth o Central)."},
+ "torre-de-londres":{ll:[51.5081,-0.0759]},
+ "tower-bridge-y-shad-thames":{ll:[51.5035,-0.0725],rain:"Cruzad el puente y pasad por Shad Thames sin pararos. Seguid directos a los rascacielos."},
+ "st-dunstan-in-the-east":{ll:[51.5098,-0.0832],opt:1,rain:"Saltadlo: es un jardín al aire libre."},
+ "the-garden-at-120":{ll:[51.5117,-0.0822],rain:"Es una azotea al aire libre y puede cerrar con mal tiempo. Alternativa cubierta y gratis: la planta 10 de la <b>Tate Modern</b>, o Horizon 22 si conseguisteis entrada."},
+ "rascacielos-y-leadenhall-market":{ll:[51.5128,-0.0835],rain:"<b>Leadenhall Market</b> es cubierto: buen sitio para esperar a que pare.",eat:[["Cafés de Leadenhall Market","Bajo techo victoriano","Leadenhall Market"]]},
+ "one-new-change-y-st-paul-s":{ll:[51.5137,-0.0958],opt:1},
+ "millennium-bridge":{ll:[51.5095,-0.0985],opt:1},
+ "ye-olde-cheshire-cheese":{ll:[51.5143,-0.1065],eat:[["Ye Olde Cheshire Cheese","Pub Samuel Smith's, barato","Ye Olde Cheshire Cheese"]]}
+};
+const KEY=[ // eventos con cuenta atrás (hora de Londres)
+ {d:9, t:"07:30",e:"✈️",n:"Vuelo Faro → Stansted"},
+ {d:10,t:"14:30",e:"🎈",n:"Mundo Pixar"},
+ {d:11,t:"16:30",e:"⚡",n:"Harry Potter"},
+ {d:12,t:"15:58",e:"🚆",n:"Tren a Southend Airport"},
+ {d:12,t:"20:05",e:"✈️",n:"Vuelo Southend → Faro"}
+];
+
+/* ================== utilidades ================== */
 const $=id=>document.getElementById(id);
-function save(){try{localStorage.setItem("ldn-pos",JSON.stringify(state))}catch(e){}}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function slug(t){return t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/&/g,"y").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,1800);}
+function londonNow(){const s=new Date().toLocaleString("sv-SE",{timeZone:"Europe/London"});return new Date(s.replace(" ","T"));}
+// fecha/hora de cada paso (hora local de Londres); los pasos de después de medianoche pasan al día siguiente
+DAYS.forEach(D=>{let prev=-1,add=0;D.steps.forEach(s=>{const m=s.t.match(/(\d{1,2}):(\d{2})/);let h=+m[1],mi=+m[2];if(prev>=0&&h*60+mi<prev-360)add=1;prev=h*60+mi;s.at=new Date(2026,9,D.n+add,h,mi);s.id=slug(s.name);Object.assign(s,X[s.id]||{});});});
+KEY.forEach(k=>{const [h,m]=k.t.split(":");k.at=new Date(2026,9,k.d,+h,+m);});
+function fmtDur(ms){const m=Math.round(ms/60000);if(m<60)return `${m} min`;const h=Math.floor(m/60),r=m%60;if(h<24)return `${h} h ${r?r+" min":""}`;const d=Math.floor(h/24);return `${d} d ${h%24} h`;}
 
-function mapsUrl(st){const q=encodeURIComponent((st.q||st.name)+" London");return `https://www.google.com/maps/dir/?api=1&destination=${q}&travelmode=transit`;}
-function photosUrl(st){return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent((st.q||st.name)+" London")}`;}
+/* ================== estado ================== */
+let state=LS.get("ldn-pos",{d:0,i:0}); if(!DAYS[state.d]||!DAYS[state.d].steps[state.i]) state={d:0,i:0};
+const h0=(location.hash||"").replace("#",""); if(/^dia[1-4]$/.test(h0)) state={d:+h0[3]-1,i:0};
+let view="ruta";
+let visited=new Set(LS.get("ldn-visited",[]));
+let WX=LS.get("ldn-wx",null);
+function save(){LS.set("ldn-pos",state);}
 
-function routeHTML(r){
-  let out="";
-  for(let k=0;k<r.length;k++){
-    const [type,txt]=r[k];
-    if(type==="s"){
-      const nxt=r[k+1];
-      let bar="";
-      if(nxt){ if(nxt[0]==="walk") bar='<div class="bar walk"></div>'; else if(nxt[0]!=="s") bar=`<div class="bar" style="background:${LN[nxt[0]][1]}"></div>`; }
-      const seg = nxt && nxt[0]!=="s" ? (nxt[0]==="walk" ? `<div class="di">🚶 ${nxt[1]}</div>` : `<span class="ln" style="background:${LN[nxt[0]][1]};color:${LN[nxt[0]][2]}">${LN[nxt[0]][0]}</span><div class="di">${nxt[1]||""}</div>`) : "";
-      out+=`<div class="rs"><div class="rail"><span class="dot"></span>${bar}</div><div><div class="st">${txt}</div>${seg}</div></div>`;
-    }
-  }
-  return `<div class="route">${out}</div>`;
+/* ================== tiempo (Open-Meteo) ================== */
+const WXI=c=>c===0?"☀️":c<=2?"🌤️":c===3?"☁️":c<=48?"🌫️":c<=57?"🌦️":c<=67?"🌧️":c<=77?"🌨️":c<=82?"🌧️":"⛈️";
+async function loadWeather(){
+  try{
+    const u="https://api.open-meteo.com/v1/forecast?latitude=51.51&longitude=-0.12&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&hourly=precipitation_probability,weathercode&timezone=Europe%2FLondon&start_date=2026-10-09&end_date=2026-10-12";
+    const r=await fetch(u); if(!r.ok) return; const j=await r.json();
+    if(!j.daily||!j.daily.time) return;
+    WX={t:Date.now(),daily:j.daily,hourly:j.hourly}; LS.set("ldn-wx",WX); renderAll();
+  }catch(e){}
+}
+function wxDay(n){ if(!WX) return null; const k=WX.daily.time.indexOf(`2026-10-${String(n).padStart(2,"0")}`); if(k<0) return null; return {code:WX.daily.weathercode[k],max:Math.round(WX.daily.temperature_2m_max[k]),min:Math.round(WX.daily.temperature_2m_min[k]),rain:WX.daily.precipitation_probability_max[k]}; }
+function wxAt(date){ if(!WX||!WX.hourly) return null; const key=`${date.getFullYear()}-10-${String(date.getDate()).padStart(2,"0")}T${String(date.getHours()).padStart(2,"0")}:00`; const k=WX.hourly.time.indexOf(key); if(k<0) return null; return {p:WX.hourly.precipitation_probability[k],code:WX.hourly.weathercode[k]}; }
+function rainSoon(D){ if(!WX||!WX.hourly) return null; for(let hh=8;hh<=23;hh++){const w=wxAt(new Date(2026,9,D.n,hh,0)); if(w&&w.p>=60) return hh;} return null; }
+
+/* ================== "ahora" y retrasos ================== */
+function nowPos(){
+  const now=londonNow();
+  const all=[];DAYS.forEach((D,d)=>D.steps.forEach((s,i)=>all.push({d,i,s})));
+  if(now<all[0].s.at) return {before:true,d:0,i:0};
+  let cur=all[0]; for(const x of all){ if(x.s.at<=now) cur=x; }
+  if(now>new Date(2026,9,13,1,0)) return {after:true,d:3,i:DAYS[3].steps.length-1};
+  return cur;
+}
+function lateInfo(){
+  const now=londonNow(), D=DAYS[state.d], nx=D.steps[state.i+1];
+  if(!nx||now<D.steps[0].at) return null;
+  const np=nowPos(); if(np.before||np.after||np.d!==state.d) return null;
+  const gap=np.i-state.i; if(gap<1||gap>3||visited.has(D.steps[state.i].id)) return null;
+  const late=now-nx.at; if(late<20*60000) return null;
+  const skip=D.steps.slice(state.i+1).filter(s=>s.opt&&!visited.has(s.id)).map(s=>s.name);
+  return {min:Math.round(late/60000),skip};
 }
 
-function render(){
+/* ================== cabecera ================== */
+function renderCount(){
+  const now=londonNow(); const k=KEY.find(x=>x.at>now);
+  const el=$("count");
+  if(!k){el.innerHTML=`<span class="em">🏠</span><span>Viaje terminado. ¡Hasta la próxima, Londres!</span>`;el.className="count";return;}
+  const ms=k.at-now; el.className="count"+(ms<3*3600000?" soon":"");
+  const dname=["","","","","","","","","","vie","sáb","dom","lun"][k.d]||"";
+  el.innerHTML=`<span class="em">${k.e}</span><span><b>${k.n}</b> en <b>${fmtDur(ms)}</b> · ${dname} ${k.d}, ${k.t}</span>`;
+}
+function renderDays(){
+  $("days").innerHTML=DAYS.map((x,j)=>{const w=wxDay(x.n);return `<button role="tab" type="button" aria-selected="${j===state.d}" style="--d:${x.color}" data-d="${j}"><span class="w">${x.w}</span><span class="n">${x.n}</span><span class="wx">${w?`${WXI(w.code)} ${w.max}°`:""}</span></button>`}).join("");
+}
+function renderTube(){
+  const D=DAYS[state.d], np=nowPos();
+  $("tube").innerHTML=D.steps.map((s,j)=>`<button class="stop ${s.k==="t"?"leg":""} ${visited.has(s.id)?"done":""} ${(np.d===state.d&&np.i===j&&!np.before&&!np.after)?"now":""}" type="button" data-i="${j}" aria-label="${esc(s.t+" "+s.name)}" ${j===state.i?'aria-current="true"':""}><span></span></button>`).join("");
+  const cur=$("tube").children[state.i], wrap=$("tube").parentNode; if(cur) wrap.scrollLeft=cur.offsetLeft-wrap.clientWidth/2+13;
+  const sites=D.steps.filter(s=>s.k!=="t"), done=sites.filter(s=>visited.has(s.id)).length;
+  const w=wxDay(D.n);
+  $("dayTitle").innerHTML=`<b>${D.title}</b> · ${done}/${sites.length} visitados${w?` · ${w.min}–${w.max}° · 💧${w.rain}%`:""}`;
+}
+
+/* ================== ruta ================== */
+function mapsUrl(st){return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent((st.q||st.name)+" London")}&travelmode=transit`;}
+function placeUrl(q){return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q+" London")}`;}
+function photosUrl(st){return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent((st.q||st.name)+" London")}`;}
+function routeHTML(r){
+  let out="";
+  for(let k=0;k<r.length;k++){const [type,txt]=r[k]; if(type!=="s") continue; const nxt=r[k+1]; let bar="",seg="";
+    if(nxt&&nxt[0]!=="s"){ if(nxt[0]==="walk"){bar='<div class="bar walk"></div>';seg=`<div class="di">🚶 ${nxt[1]}</div>`;} else {bar=`<div class="bar" style="background:${LN[nxt[0]][1]}"></div>`;seg=`<span class="ln" style="background:${LN[nxt[0]][1]};color:${LN[nxt[0]][2]}">${LN[nxt[0]][0]}</span><div class="di">${nxt[1]||""}</div>`;} }
+    out+=`<div class="rs"><div class="rail"><span class="dot"></span>${bar}</div><div><div class="st">${txt}</div>${seg}</div></div>`;}
+  return `<div class="route">${out}</div>`;
+}
+function renderRoute(){
   const D=DAYS[state.d], st=D.steps[state.i];
-  document.documentElement.style.setProperty("--day",D.color);
-  // días
-  $("days").innerHTML=DAYS.map((x,j)=>`<button role="tab" type="button" aria-selected="${j===state.d}" style="--d:${x.color}" data-d="${j}"><span class="w">${x.w}</span><span class="n">${x.n}</span></button>`).join("");
-  // línea
-  $("tube").innerHTML=D.steps.map((s,j)=>`<button class="stop ${s.k==="t"?"leg":""} ${j<state.i?"done":""}" type="button" data-i="${j}" aria-label="${s.t} ${s.name}" ${j===state.i?'aria-current="true"':""}><span></span></button>`).join("");
-  const cur=$("tube").children[state.i]; if(cur) cur.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
-  $("dayTitle").innerHTML=`<b>${D.title}</b> · ${state.i+1}/${D.steps.length}`;
-  // tarjeta
-  const [c1,c2]=SC[st.c]||SC.tube;
-  const isLeg=st.k==="t";
-  $("main").innerHTML=`<article class="card fade">
-   <div class="post" style="--c1:${c1};--c2:${c2}">${scene(st.c)}<span class="time">${st.t}</span><span class="cat">${CATNAME[st.c]||""}</span><span class="stamp">${D.w} ${D.n} oct · Londres</span></div>
-   <div class="body"><h2>${st.name}</h2>${st.where?`<div class="where">${st.where}</div>`:""}
-   <p class="desc">${st.desc}</p>
-   ${st.tip?`<div class="tip">${st.tip}</div>`:""}
-   ${st.route?routeHTML(st.route):""}
-   ${!isLeg||st.q?`<div class="actions">
+  const [c1,c2]=SC[st.c]||SC.tube, isLeg=st.k==="t";
+  const hw=wxAt(st.at), wet=hw&&hw.p>=50;
+  const late=lateInfo();
+  const photo=isLeg?"":`<img class="photo" src="img/${st.id}.jpg" alt="" onload="this.parentNode.classList.add('has-photo')" onerror="this.remove()">`;
+  $("v-ruta").innerHTML=`<article class="card fade">
+   <div class="post" style="--c1:${c1};--c2:${c2}">${scene(st.c)}${photo}<span class="time">${st.t}</span><span class="cat">${CATNAME[st.c]||""}</span><span class="stamp">${D.w} ${D.n} oct · Londres</span>${hw?`<span class="wxc">${WXI(hw.code)} 💧${hw.p}%</span>`:""}</div>
+   <div class="body">
+    <div class="titleRow"><h2>${st.name}</h2>${isLeg?"":`<button class="visit ${visited.has(st.id)?"on":""}" id="visitBtn" type="button" aria-pressed="${visited.has(st.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>${visited.has(st.id)?"Visitado":"Visitar"}</button>`}</div>
+    ${st.where?`<div class="where">${st.where}${st.opt?" · <b>opcional</b>":""}</div>`:""}
+    ${late?`<div class="box late">⏱️ <b>Vais unos ${late.min} min tarde</b> respecto al plan.${late.skip.length?` Para recuperar tiempo, podéis saltaros: <b>${late.skip.join(", ")}</b>.`:""}</div>`:""}
+    <p class="desc">${st.desc}</p>
+    ${st.tip?`<div class="box tip">${st.tip}</div>`:""}
+    ${st.rain?`<details class="box planb" ${wet?"open":""}><summary>☔ Plan B si llueve${wet?` · lluvia probable (${hw.p}%)`:""}</summary><p>${st.rain}</p></details>`:""}
+    ${st.route?routeHTML(st.route):""}
+    ${st.eat?`<div class="eat"><h4>🍴 Cerca para comer o beber</h4>${st.eat.map(e=>`<a href="${placeUrl(e[2])}" target="_blank" rel="noopener"><b>${e[0]}</b><span>${e[1]}</span></a>`).join("")}</div>`:""}
+    ${!isLeg?`<div class="actions">
      <a class="act primary" href="${mapsUrl(st)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Cómo llegar</a>
      <a class="act" href="${photosUrl(st)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Ver fotos</a></div>`:""}
    </div></article>`;
-  // navegación
+  const vb=$("visitBtn"); if(vb) vb.onclick=()=>{ visited.has(st.id)?visited.delete(st.id):visited.add(st.id); LS.set("ldn-visited",[...visited]); if(visited.has(st.id)) toast("Marcado como visitado ✓"); renderTube(); renderRoute(); };
   const nextStep=D.steps[state.i+1];
-  $("prev").disabled = state.d===0 && state.i===0;
-  if(nextStep){ $("nextLbl").textContent=`Siguiente · ${nextStep.t}`; $("nextName").textContent=nextStep.name; $("next").disabled=false; }
-  else if(state.d<DAYS.length-1){ $("nextLbl").textContent="Siguiente día"; $("nextName").textContent=`${DAYS[state.d+1].w} ${DAYS[state.d+1].n} · ${DAYS[state.d+1].title}`; $("next").disabled=false; }
-  else { $("nextLbl").textContent="Fin del viaje"; $("nextName").textContent="¡Buen vuelo! ✈"; $("next").disabled=true; }
+  $("prev").disabled=state.d===0&&state.i===0;
+  if(nextStep){$("nextLbl").textContent=`Siguiente · ${nextStep.t}`;$("nextName").textContent=nextStep.name;$("next").disabled=false;}
+  else if(state.d<DAYS.length-1){$("nextLbl").textContent="Siguiente día";$("nextName").textContent=`${DAYS[state.d+1].w} ${DAYS[state.d+1].n} · ${DAYS[state.d+1].title}`;$("next").disabled=false;}
+  else {$("nextLbl").textContent="Fin del viaje";$("nextName").textContent="¡Buen vuelo! ✈";$("next").disabled=true;}
+}
+
+/* ================== mapa ================== */
+let map=null,layer=null,meMarker=null;
+function renderMap(){
+  const D=DAYS[state.d];
+  const pts=D.steps.map((s,i)=>({s,i})).filter(x=>x.s.ll&&x.s.k!=="t");
+  // lista (siempre)
+  let n=0;
+  $("mapList").innerHTML=`<h3>${D.w} ${D.n} · ${D.title}</h3>`+pts.map(x=>{n++;return `<a href="${placeUrl(x.s.q||x.s.name)}" target="_blank" rel="noopener"><span class="num" style="background:${D.color};${visited.has(x.s.id)?"opacity:.5":""}">${n}</span><span><b>${x.s.name}</b><br><span class="small muted">${x.s.t}${visited.has(x.s.id)?" · visitado ✓":""}</span></span></a>`}).join("");
+  if(typeof L==="undefined"){ $("map").hidden=true; document.querySelector(".mapbar").hidden=true; $("mapNote").textContent="El mapa interactivo funciona en la versión instalada (GitHub). Aquí tienes la lista del día con enlaces a Google Maps."; return; }
+  if(!map){
+    map=L.map("map",{zoomControl:false,attributionControl:true});
+    const dark=matchMedia("(prefers-color-scheme: dark)").matches;
+    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,{maxZoom:19,attribution:'© OpenStreetMap · © CARTO'}).addTo(map);
+    L.control.zoom({position:"bottomright"}).addTo(map);
+  }
+  if(layer) layer.remove();
+  layer=L.layerGroup().addTo(map);
+  const lls=[]; n=0;
+  pts.forEach(x=>{ n++; lls.push(x.s.ll);
+    const ic=L.divIcon({className:"",html:`<div class="pin ${visited.has(x.s.id)?"done":""}" style="background:${D.color}">${n}</div>`,iconSize:[26,26],iconAnchor:[13,13]});
+    const m=L.marker(x.s.ll,{icon:ic}).addTo(layer);
+    m.bindPopup(`<b>${x.s.t} · ${x.s.name}</b><br><a href="#" data-go="${x.i}">Ver en la ruta ›</a> · <a href="${mapsUrl(x.s)}" target="_blank" rel="noopener">Cómo llegar</a>`);
+  });
+  // tramo largo (Wembley / Watford) separado para no dibujar líneas engañosas
+  const far=ll=>ll[1]<-0.25;
+  let seg=[]; const segs=[];
+  pts.forEach(x=>{ if(seg.length&&far(seg[seg.length-1])!==far(x.s.ll)){segs.push(seg);seg=[];} seg.push(x.s.ll); }); if(seg.length) segs.push(seg);
+  segs.forEach(sg=>{ if(sg.length>1) L.polyline(sg,{color:D.color,weight:4,opacity:.8,dashArray:"8 8"}).addTo(layer); });
+  setTimeout(()=>{ map.invalidateSize(); const near=lls.filter(ll=>!far(ll)); map.fitBounds(L.latLngBounds(near.length?near:lls),{padding:[30,30]}); },60);
+}
+function locate(){
+  if(!navigator.geolocation){toast("Ubicación no disponible");return;}
+  navigator.geolocation.getCurrentPosition(p=>{
+    const ll=[p.coords.latitude,p.coords.longitude];
+    if(meMarker) meMarker.remove();
+    meMarker=L.marker(ll,{icon:L.divIcon({className:"",html:'<div class="me"></div>',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(map);
+    map.setView(ll,15);
+  },()=>toast("Activa la ubicación para esta app"),{enableHighAccuracy:true,timeout:10000});
+}
+
+/* ================== gastos ================== */
+let G2=LS.get("ldn-gastos",{people:["Yo","Acompañante"],items:[],rate:1.15,rateDate:null});
+function saveG(){LS.set("ldn-gastos",G2);}
+async function loadRate(){
+  try{const r=await fetch("https://api.frankfurter.app/latest?from=GBP&to=EUR"); if(!r.ok) return; const j=await r.json(); if(j.rates&&j.rates.EUR){G2.rate=+j.rates.EUR.toFixed(4);G2.rateDate=j.date;saveG(); if(view==="gastos") renderGastos();}}catch(e){}
+}
+const gbp=it=>it.cur==="GBP"?it.amt:it.amt/G2.rate;
+const f2=x=>x.toFixed(2).replace(".",",");
+function settle(){
+  const bal={}; G2.people.forEach(p=>bal[p]=0);
+  G2.items.forEach(it=>{const v=gbp(it); const sh=it.split.filter(p=>p in bal); if(!sh.length) return; if(it.by in bal) bal[it.by]+=v; sh.forEach(p=>bal[p]-=v/sh.length);});
+  const cred=Object.entries(bal).filter(e=>e[1]>0.005).map(e=>[e[0],e[1]]).sort((a,b)=>b[1]-a[1]);
+  const debt=Object.entries(bal).filter(e=>e[1]<-0.005).map(e=>[e[0],-e[1]]).sort((a,b)=>b[1]-a[1]);
+  const tr=[]; let i=0,j=0; while(i<debt.length&&j<cred.length){const v=Math.min(debt[i][1],cred[j][1]); tr.push([debt[i][0],cred[j][0],v]); debt[i][1]-=v; cred[j][1]-=v; if(debt[i][1]<0.005)i++; if(cred[j][1]<0.005)j++;}
+  return {bal,tr};
+}
+function renderGastos(){
+  const total=G2.items.reduce((a,it)=>a+gbp(it),0);
+  const {bal,tr}=settle();
+  const opts=G2.people.map(p=>`<option>${esc(p)}</option>`).join("");
+  $("v-gastos").innerHTML=`
+  <div class="sec"><h3>💷 Gastos del viaje</h3>
+    <div class="row2"><div><div class="small muted">Total</div><div class="addr">£${f2(total)}</div></div><div><div class="small muted">En euros</div><div class="addr">${f2(total*G2.rate)} €</div></div></div>
+    <p class="small muted" style="margin:8px 0 0">1 £ = ${String(G2.rate).replace(".",",")} €${G2.rateDate?` (cambio del ${G2.rateDate})`:" (aprox.; se actualiza con internet)"}</p>
+  </div>
+  <div class="sec"><h3>Quiénes vais</h3>
+    <div class="people">${G2.people.map((p,k)=>`<span class="pchip">${esc(p)}<button type="button" data-delp="${k}" aria-label="Quitar ${esc(p)}">✕</button></span>`).join("")}</div>
+    <div class="row2" style="margin-top:10px"><label class="f">Nombre<input id="pName" placeholder="Ej. Lucía" autocomplete="off"></label><button class="btn sec2" id="addP" type="button" style="align-self:end">Añadir</button></div>
+  </div>
+  <form class="sec stack" id="gForm"><h3 style="margin:0">Nuevo gasto</h3>
+    <label class="f">Concepto<input id="gC" placeholder="Ej. Cena en Poppies" required autocomplete="off"></label>
+    <div class="row2"><label class="f">Importe<input id="gA" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0,00" required></label>
+    <label class="f">Moneda<select id="gCur"><option value="GBP">£ libras</option><option value="EUR">€ euros</option></select></label></div>
+    <label class="f">Pagó<select id="gBy">${opts}</select></label>
+    <div class="f">Entre quiénes se reparte<div class="split" id="gSplit">${G2.people.map(p=>`<label><input type="checkbox" value="${esc(p)}" checked> ${esc(p)}</label>`).join("")}</div></div>
+    <button class="btn" type="submit">Añadir gasto</button>
+  </form>
+  <div class="sec"><h3>Cuentas</h3>
+    ${G2.people.map(p=>`<div class="bal"><span>${esc(p)}</span><span class="${bal[p]>=0?"pos":"neg"}">${bal[p]>=0?"+":"−"}£${f2(Math.abs(bal[p]||0))}</span></div>`).join("")}
+    ${tr.length?tr.map(t=>`<div class="transfer">${esc(t[0])} → ${esc(t[1])}: <b>£${f2(t[2])}</b> (${f2(t[2]*G2.rate)} €)</div>`).join(""):`<p class="empty">Todo cuadrado por ahora.</p>`}
+    <button class="btn sec2" id="copyG" type="button" style="display:block;margin-top:12px">Copiar resumen</button>
+  </div>
+  <div class="sec"><h3>Historial</h3>${G2.items.length?G2.items.slice().reverse().map(it=>`<div class="exp"><div class="c"><b>${esc(it.c)}</b><small>Pagó ${esc(it.by)} · entre ${it.split.length} · ${it.d}</small></div><div class="a">${it.cur==="GBP"?"£":""}${f2(it.amt)}${it.cur==="EUR"?" €":""}<small>${it.cur==="GBP"?f2(it.amt*G2.rate)+" €":"£"+f2(it.amt/G2.rate)}</small></div><button type="button" data-delg="${it.id}" aria-label="Borrar">✕</button></div>`).join(""):`<p class="empty">Aún no hay gastos. Añade el primero con el formulario de arriba.</p>`}
+    <p class="small muted">Los gastos se guardan solo en este móvil. Si los apunta una sola persona, las cuentas salen bien para todos.</p></div>`;
+  $("addP").onclick=()=>{const v=$("pName").value.trim(); if(v&&!G2.people.includes(v)){G2.people.push(v);saveG();renderGastos();}};
+  $("v-gastos").querySelectorAll("[data-delp]").forEach(b=>b.onclick=()=>{ if(G2.people.length<=1) return; G2.people.splice(+b.dataset.delp,1); saveG(); renderGastos(); });
+  $("v-gastos").querySelectorAll("[data-delg]").forEach(b=>b.onclick=()=>{ G2.items=G2.items.filter(x=>x.id!==b.dataset.delg); saveG(); renderGastos(); });
+  $("gForm").onsubmit=e=>{e.preventDefault(); const amt=parseFloat(String($("gA").value).replace(",",".")); if(!(amt>0)) return;
+    const split=[...$("gSplit").querySelectorAll("input:checked")].map(x=>x.value); if(!split.length){toast("Elige al menos una persona");return;}
+    const now=londonNow(); G2.items.push({id:String(Date.now()),c:$("gC").value.trim(),amt,cur:$("gCur").value,by:$("gBy").value,split,d:`${now.getDate()}/${now.getMonth()+1} ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`});
+    saveG(); renderGastos(); toast("Gasto añadido"); };
+  $("copyG").onclick=async()=>{ const txt=`Gastos Londres: total £${f2(total)} (${f2(total*G2.rate)} €)\n`+(tr.length?tr.map(t=>`${t[0]} → ${t[1]}: £${f2(t[2])} (${f2(t[2]*G2.rate)} €)`).join("\n"):"Todo cuadrado"); try{await navigator.clipboard.writeText(txt);toast("Resumen copiado");}catch(e){toast("No se pudo copiar");} };
+}
+
+/* ================== info ================== */
+const RES=[["vie 9 · 07:30","Ryanair Faro → Stansted","ryan"],["vie 9 · 11:05","National Express Stansted → Stratford","nx"],["vie 9–lun 12","Park Hotel Ilford","hotel"],["sáb 10 · 14:30","Mundo Pixar Experience","pixar"],["dom 11 · 16:30","Warner Bros. Studio Tour","hp"],["lun 12 · 15:58","Trainline Ilford → Southend Airport","train"],["lun 12 · 20:05","easyJet Southend → Faro","ezy"]];
+function renderInfo(){
+  const codes=LS.get("ldn-codes",{});
+  $("v-info").innerHTML=`
+  <div class="sec"><h3>🏨 Hotel</h3>
+    <div class="addr">Park Hotel<br>327 Cranbrook Road<br>Ilford IG1 4UE</div>
+    <p class="small muted">Para enseñar a un taxista. Check-in desde las 13:00 · check-out hasta las 10:30 · sin desayuno.</p>
+    <div class="actions"><a class="act primary" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent("Park Hotel, 327 Cranbrook Road, Ilford IG1 4UE")}&travelmode=transit" target="_blank" rel="noopener">Volver al hotel</a><button class="act" type="button" id="copyAddr">Copiar dirección</button></div>
+    <h4>Estaciones cerca</h4>
+    <div class="kv"><span><b style="color:#6950A1">●</b> Ilford (Elizabeth line)</span><b>13 min a pie</b></div>
+    <div class="kv"><span><b style="color:#DC241F">●</b> Gants Hill (Central)</span><b>13 min a pie</b></div>
+  </div>
+  <div class="sec"><h3>🎟️ Reservas</h3>
+    <p class="small muted" style="margin-top:-4px">Apunta aquí los localizadores. Se guardan solo en este móvil.</p>
+    ${RES.map(r=>`<div class="res"><span class="w">${r[0]}</span><span class="nm">${r[1]}</span><input id="code-${r[2]}" data-code="${r[2]}" placeholder="Código de reserva" value="${esc(codes[r[2]]||"")}" autocomplete="off"></div>`).join("")}
+  </div>
+  <div class="sec"><h3>🌙 Volver de noche</h3>
+    <div class="kv"><span>Viernes 9</span><b>Night Tube toda la noche → Gants Hill</b></div>
+    <div class="kv"><span>Sábado 10</span><b>Night Tube toda la noche → Gants Hill</b></div>
+    <div class="kv"><span>Domingo 11</span><b>Sin Night Tube: último Elizabeth antes, comprobadlo</b></div>
+    <div class="kv"><span>Entre semana</span><b>Último Elizabeth: TCR ~00:25 · Liverpool St ~00:55</b></div>
+    <p class="small muted">De madrugada coged la Central en dirección Hainault vía Newbury Park (pasa por Gants Hill cada ~20 min). Si se escapa todo: bus nocturno en Citymapper.</p>
+  </div>
+  <div class="sec"><h3>🆘 Emergencias</h3>
+    <div class="kv"><span>Emergencias (policía, ambulancia, bomberos)</span><b>999 o 112</b></div>
+    <div class="kv"><span>Urgencias médicas no graves</span><b>111</b></div>
+    <p class="small muted">Si perdéis el pasaporte, el Consulado de España en Londres tramita el documento de viaje. Buscad su contacto en la web del Ministerio de Exteriores.</p>
+  </div>
+  <div class="sec"><h3>💡 Trucos</h3>
+    <div class="kv"><span>Transporte</span><b>Contactless, una tarjeta por persona</b></div>
+    <div class="kv"><span>Tope diario zonas 1–4</span><b>~14–15 £</b></div>
+    <div class="kv"><span>Enchufe</span><b>Tipo G (llevad adaptador)</b></div>
+    <div class="kv"><span>Pubs</span><b>Se pide y se paga en la barra</b></div>
+    <div class="kv"><span>Restaurantes</span><b>Mirad si ya cobran 12,5% de servicio</b></div>
+    <div class="kv"><span>Escaleras mecánicas</span><b>Quietos a la derecha, andando por la izquierda</b></div>
+  </div>
+  <div class="sec"><h3>🗣️ Frases útiles</h3>
+    ${[["Una pinta de cerveza, por favor","A pint of lager, please"],["Media pinta","A half, please"],["¿Puedo pagar con tarjeta?","Can I pay by card?"],["¿Dónde está la estación de metro?","Where's the tube station?"],["¿Este tren para en…?","Does this train stop at…?"],["Mesa para dos, por favor","A table for two, please"],["La cuenta, por favor","Could we have the bill, please?"],["Perdón (para pasar)","Sorry / Excuse me"],["¡Salud!","Cheers!"]].map(p=>`<div class="phr"><span>${p[0]}</span><b>${p[1]}</b></div>`).join("")}
+  </div>
+  <div class="sec"><h3>Visitados</h3><p class="small muted" style="margin-top:-4px">${visited.size} sitios marcados.</p><button class="btn sec2" id="resetV" type="button">Borrar marcas de visitado</button></div>`;
+  $("v-info").querySelectorAll("[data-code]").forEach(inp=>inp.oninput=()=>{const c=LS.get("ldn-codes",{});c[inp.dataset.code]=inp.value;LS.set("ldn-codes",c);});
+  $("copyAddr").onclick=async()=>{try{await navigator.clipboard.writeText("Park Hotel, 327 Cranbrook Road, Ilford IG1 4UE");toast("Dirección copiada");}catch(e){toast("Mantén pulsada la dirección para copiarla");}};
+  let armed=false; $("resetV").onclick=e=>{ if(!armed){armed=true;e.target.textContent="Pulsa otra vez para confirmar";return;} visited=new Set();LS.set("ldn-visited",[]);toast("Marcas borradas");renderAll(); };
+}
+
+/* ================== navegación ================== */
+function renderAll(){
+  const D=DAYS[state.d];
+  document.documentElement.style.setProperty("--day",D.color);
+  renderCount(); renderDays(); renderTube();
+  $("routeHead").hidden = !(view==="ruta");
+  $("navbar").hidden = view!=="ruta";
+  ["ruta","mapa","gastos","info"].forEach(v=>$("v-"+v).hidden=v!==view);
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.v===view));
+  if(view==="ruta") renderRoute(); else if(view==="mapa") renderMap(); else if(view==="gastos") renderGastos(); else renderInfo();
   save();
 }
-function go(d,i){state={d,i};render();window.scrollTo({top:0,behavior:"smooth"});}
+function go(d,i){state={d,i};if(view!=="ruta"&&view!=="mapa")view="ruta";renderAll();window.scrollTo({top:0,behavior:"smooth"});}
 function next(){const D=DAYS[state.d]; if(state.i<D.steps.length-1) go(state.d,state.i+1); else if(state.d<DAYS.length-1) go(state.d+1,0);}
 function prev(){ if(state.i>0) go(state.d,state.i-1); else if(state.d>0) go(state.d-1,DAYS[state.d-1].steps.length-1);}
 
-$("days").addEventListener("click",e=>{const b=e.target.closest("button"); if(b) go(+b.dataset.d,0);});
+$("days").addEventListener("click",e=>{const b=e.target.closest("button"); if(b){state={d:+b.dataset.d,i:0};renderAll();}});
 $("tube").addEventListener("click",e=>{const b=e.target.closest(".stop"); if(b) go(state.d,+b.dataset.i);});
-$("next").addEventListener("click",next); $("prev").addEventListener("click",prev);
-document.addEventListener("keydown",e=>{ if($("sheet").hidden){ if(e.key==="ArrowRight") next(); if(e.key==="ArrowLeft") prev(); } else if(e.key==="Escape") $("sheet").hidden=true; });
-// deslizar
+$("next").onclick=next; $("prev").onclick=prev;
+$("nowBtn").onclick=()=>{ const p=nowPos(); view="ruta"; go(p.d,p.i); toast(p.before?`Faltan ${fmtDur(DAYS[0].steps[0].at-londonNow())} para empezar`:p.after?"El viaje ya terminó":"Esto es lo que toca ahora"); };
+$("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab"); if(b){view=b.dataset.v;renderAll();window.scrollTo({top:0});}});
+$("locate").onclick=locate; $("fitDay").onclick=()=>renderMap();
+document.addEventListener("click",e=>{const a=e.target.closest("[data-go]"); if(a){e.preventDefault(); view="ruta"; go(state.d,+a.dataset.go);}});
+document.addEventListener("keydown",e=>{ if(!$("sheet").hidden){ if(e.key==="Escape") $("sheet").hidden=true; return;} if(view!=="ruta"||/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return; if(e.key==="ArrowRight") next(); if(e.key==="ArrowLeft") prev(); });
 let sx=null,sy=null;
-$("main").addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
-$("main").addEventListener("touchend",e=>{ if(sx===null) return; const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){ dx<0?next():prev(); } sx=null; },{passive:true});
-// lista
+$("v-ruta").addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+$("v-ruta").addEventListener("touchend",e=>{ if(sx===null) return; const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){ dx<0?next():prev(); } sx=null; },{passive:true});
 function openList(){
   const D=DAYS[state.d];
-  $("panel").innerHTML=`<h3>${D.w} ${D.n} · ${D.title}</h3>`+D.steps.map((s,j)=>`<button class="li ${s.k==="t"?"leg":""}" type="button" data-i="${j}" ${j===state.i?'aria-current="true"':""}><span class="t">${s.t}</span><span class="d"></span><span class="n">${s.name}<small>${s.where||""}</small></span></button>`).join("");
+  $("panel").innerHTML=`<h3>${D.w} ${D.n} · ${D.title}</h3>`+D.steps.map((s,j)=>`<button class="li ${s.k==="t"?"leg":""} ${visited.has(s.id)?"done":""}" type="button" data-i="${j}" ${j===state.i?'aria-current="true"':""}><span class="t">${s.t}</span><span class="d"></span><span class="n">${s.name}<small>${s.where||""}${s.opt?" · opcional":""}</small></span><span class="ok">${visited.has(s.id)?"✓":""}</span></button>`).join("");
   $("sheet").hidden=false;
 }
-$("openList").addEventListener("click",openList); $("listBtn").addEventListener("click",openList);
+$("openList").onclick=openList; $("listBtn").onclick=openList;
 $("sheet").addEventListener("click",e=>{ const b=e.target.closest(".li"); if(b){ $("sheet").hidden=true; go(state.d,+b.dataset.i); } else if(e.target===$("sheet")) $("sheet").hidden=true; });
-render();
+
+renderAll();
+setInterval(()=>{renderCount(); if(view==="ruta") renderTube();},30000);
+loadWeather(); loadRate();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
 </script>
 
