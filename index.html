@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1530">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Londres">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
+<title>Londres en ruta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..900&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: app de una pantalla tipo "línea de metro" — cabecera con días, línea de estaciones, tarjeta-postal, barra inferior Anterior/Siguiente */
+:root{
+  --bg:#eef1f6; --surface:#ffffff; --fg:#14182a; --muted:#5b6378; --line:#d9dee8; --chip:#e3e8f1;
+  --ink-strong:#0d1530; --accent:#dc241f; --day:#dc241f;
+  --font-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --font-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --shadow:0 10px 30px -14px rgba(16,24,48,.35);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b1020; --surface:#151b30; --fg:#e8ecf6; --muted:#9aa3bb; --line:#262e48; --chip:#1f2741; --ink-strong:#ffffff; --shadow:0 10px 30px -14px rgba(0,0,0,.7); color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1020; --surface:#151b30; --fg:#e8ecf6; --muted:#9aa3bb; --line:#262e48; --chip:#1f2741; --ink-strong:#ffffff; --shadow:0 10px 30px -14px rgba(0,0,0,.7); color-scheme:dark}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-inline:16px}
+
+/* cabecera */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 8px}
+.brand{display:flex;align-items:center;gap:10px}
+.roundel{width:30px;height:30px;flex:none;position:relative}
+.roundel i{position:absolute;inset:0;border:6px solid var(--accent);border-radius:50%}
+.roundel b{position:absolute;left:-3px;right:-3px;top:50%;height:8px;margin-top:-4px;background:var(--ink-strong);border-radius:1px}
+.brand h1{font-family:var(--font-display);font-stretch:85%;font-weight:850;font-size:22px;letter-spacing:-.01em;margin:0;color:var(--ink-strong)}
+.brand .sub{font-size:12px;color:var(--muted);margin-left:auto;text-align:right;line-height:1.2}
+.days{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+.days button{all:unset;cursor:pointer;text-align:center;padding:7px 4px 8px;border-radius:12px;background:var(--chip);color:var(--fg);border-bottom:4px solid transparent;transition:transform .15s}
+.days button .w{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.days button .n{display:block;font-family:var(--font-display);font-weight:800;font-size:20px;line-height:1.1}
+.days button[aria-selected="true"]{background:var(--d);color:#fff;border-bottom-color:rgba(0,0,0,.25)}
+.days button[aria-selected="true"] .w{color:rgba(255,255,255,.85)}
+.days button:focus-visible,.navbtn:focus-visible,.act:focus-visible,.stop:focus-visible{outline:3px solid var(--day);outline-offset:2px}
+
+/* línea de estaciones */
+.lineWrap{overflow-x:auto;scrollbar-width:none;margin-top:10px;padding-block:6px 4px}
+.lineWrap::-webkit-scrollbar{display:none}
+.tube{position:relative;display:flex;gap:0;min-width:max-content;padding-inline:4px}
+.tube:before{content:"";position:absolute;left:10px;right:10px;top:50%;height:6px;margin-top:-3px;background:var(--day);border-radius:3px;opacity:.9}
+.stop{all:unset;cursor:pointer;position:relative;width:26px;height:22px;display:grid;place-items:center}
+.stop span{width:12px;height:12px;border-radius:50%;background:var(--surface);border:3px solid var(--day);transition:transform .2s}
+.stop.leg span{width:6px;height:6px;border-width:0;background:rgba(255,255,255,.85)}
+.stop.done span{background:var(--day)}
+.stop[aria-current="true"] span{transform:scale(1.55);background:#fff;box-shadow:0 0 0 3px var(--bg)}
+.meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
+.meta b{color:var(--fg)}
+
+/* tarjeta */
+main{flex:1;padding-block:8px 120px}
+.card{background:var(--surface);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}
+.post{position:relative;aspect-ratio:16/10;max-width:100%;color:#fff;overflow:hidden;background:linear-gradient(160deg,var(--c1),var(--c2))}
+.post svg.scene{position:absolute;inset:0;width:100%;height:100%}
+.post .time{position:absolute;left:14px;top:14px;font-family:var(--font-display);font-weight:800;font-size:15px;background:rgba(0,0,0,.28);backdrop-filter:blur(4px);padding:4px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
+.post .cat{position:absolute;right:14px;top:14px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(255,255,255,.18);padding:5px 10px;border-radius:999px}
+.post .stamp{position:absolute;left:14px;bottom:12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.9;font-weight:600}
+.body{padding:18px 18px 20px}
+.body h2{font-family:var(--font-display);font-stretch:90%;font-weight:850;font-size:27px;line-height:1.05;letter-spacing:-.015em;margin:0;color:var(--ink-strong);text-wrap:balance}
+.where{margin-top:6px;color:var(--muted);font-size:13px}
+.desc{margin:12px 0 0;font-size:15.5px}
+.tip{margin-top:14px;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--day) 12%,var(--surface));font-size:14px}
+.tip b{color:var(--ink-strong)}
+.warn{background:color-mix(in srgb,#e08a1e 18%,var(--surface))}
+.route{margin-top:14px;display:flex;flex-direction:column;gap:0}
+.rs{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:stretch}
+.rs .rail{display:flex;flex-direction:column;align-items:center}
+.rs .dot{width:14px;height:14px;border-radius:50%;background:var(--surface);border:3.5px solid var(--fg);margin-top:3px;flex:none}
+.rs .bar{flex:1;width:6px;border-radius:3px;min-height:34px;margin-block:2px}
+.rs .bar.walk{background:repeating-linear-gradient(var(--muted) 0 4px,transparent 4px 8px);width:3px}
+.rs .st{font-weight:700;color:var(--ink-strong)}
+.rs .ln{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;margin:6px 0 2px}
+.rs .di{font-size:12.5px;color:var(--muted);padding-bottom:8px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.act{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:700;font-size:14px;padding:12px;border-radius:14px;background:var(--chip);color:var(--fg)}
+.act.primary{background:var(--day);color:#fff}
+.act svg{width:18px;height:18px}
+
+/* barra inferior */
+.navbar{position:fixed;left:0;right:0;bottom:0;z-index:6;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 28%)}
+.navin{max-width:520px;margin:0 auto;display:grid;grid-template-columns:56px 1fr 56px;gap:8px}
+.navbtn{all:unset;cursor:pointer;box-sizing:border-box;border-radius:16px;min-height:56px;display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+.navbtn.next{background:var(--ink-strong);color:var(--bg);justify-content:space-between;padding:8px 14px 8px 16px;gap:10px;min-width:0}
+.navbtn.next .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.75;font-weight:700}
+.navbtn.next .nm{font-family:var(--font-display);font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.navbtn.next .tx{min-width:0;display:flex;flex-direction:column}
+.navbtn[disabled]{opacity:.35;pointer-events:none}
+.navbtn svg{width:22px;height:22px;flex:none}
+
+/* lista del día */
+.sheet{position:fixed;inset:0;z-index:10;background:rgba(5,8,20,.5);display:flex;align-items:flex-end}
+.sheet .panel{background:var(--surface);width:100%;max-width:520px;margin:0 auto;border-radius:22px 22px 0 0;max-height:82%;overflow:auto;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.sheet h3{font-family:var(--font-display);font-weight:850;font-size:20px;margin:4px 0 10px;color:var(--ink-strong)}
+.li{all:unset;cursor:pointer;display:grid;grid-template-columns:52px 14px 1fr;gap:10px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--line);width:100%;box-sizing:border-box}
+.li .t{font-family:var(--font-display);font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
+.li .d{width:12px;height:12px;border-radius:50%;border:3px solid var(--day);background:var(--surface)}
+.li.leg .d{border-width:0;background:var(--line)}
+.li .n{font-weight:600;min-width:0}
+.li .n small{display:block;color:var(--muted);font-weight:500;font-size:12px}
+.li[aria-current="true"]{background:color-mix(in srgb,var(--day) 12%,transparent);border-radius:10px}
+.listbtn{all:unset;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--day);padding:4px 0}
+.fade{animation:fade .28s ease}
+@keyframes fade{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}.stop span{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="roundel" aria-hidden="true"><i></i><b></b></div>
+      <h1>Londres en ruta</h1>
+      <div class="sub">9–12 oct 2026<br>Base: Ilford</div>
+    </div>
+    <div class="days" role="tablist" id="days"></div>
+    <div class="lineWrap" id="lineWrap"><div class="tube" id="tube"></div></div>
+    <div class="meta"><span id="dayTitle"></span><button class="listbtn" id="openList" type="button">Ver el día ›</button></div>
+  </header>
+  <main id="main"></main>
+</div>
+
+<nav class="navbar"><div class="navin">
+  <button class="navbtn" id="prev" type="button" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="navbtn next" id="next" type="button"><span class="tx"><span class="lbl" id="nextLbl">Siguiente</span><span class="nm" id="nextName"></span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+  <button class="navbtn" id="listBtn" type="button" aria-label="Lista del día"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.2" fill="currentColor"/><circle cx="4" cy="12" r="1.2" fill="currentColor"/><circle cx="4" cy="18" r="1.2" fill="currentColor"/></svg></button>
+</div></nav>
+
+<div class="sheet" id="sheet" hidden><div class="panel" id="panel"></div></div>
+
+<script>
+/* ---------- líneas de transporte (colores oficiales) ---------- */
+const LN={eliz:["Elizabeth line","#6950A1","#fff"],central:["Central","#DC241F","#fff"],jubilee:["Jubilee","#868F98","#fff"],
+northern:["Northern","#000","#fff"],picc:["Piccadilly","#003688","#fff"],district:["District","#00782A","#fff"],circle:["Circle / Metropolitan / H&C","#FFD329","#1b1f2a"],
+metro:["Metropolitan","#9B0056","#fff"],victoria:["Victoria","#0098D4","#fff"],lnwr:["Tren London Northwestern","#2E7D5B","#fff"],
+ga:["Tren Greater Anglia","#D70428","#fff"],nx:["Bus National Express","#1d2e52","#fff"],shuttle:["Lanzadera Warner Bros.","#7a4a1d","#fff"],walk:["A pie","",""]};
+
+/* ---------- escenas (categoría → colores + dibujo) ---------- */
+const SC={
+ plane:["#3a7bd5","#1d3f8a"], bus:["#2b4c8c","#14254d"], tube:["#6950A1","#2f2160"], hotel:["#5b6b8c","#2c3550"],
+ market:["#e0812a","#a3401b"], river:["#2f8fc4","#164e7a"], eye:["#3b73c4","#1c3a78"], bigben:["#c49a45","#6a4a1b"],
+ park:["#3f9b5b","#1d5a35"], palace:["#b8343a","#5e1420"], square:["#8a6f4e","#41301e"], food:["#e7532f","#9a2414"],
+ lights:["#d62b7a","#4a1170"], pub:["#a8662a","#4b2a10"], screens:["#6a3cf0","#1b0f6b"], night:["#27306b","#0a0d2a"],
+ houses:["#ef7aa3","#5aa9d6"], museum:["#6f7f95","#2d3747"], balloon:["#2bb3c9","#e04f7a"], sweets:["#f29ac0","#c2457e"],
+ sunset:["#f39a44","#7a3b8f"], wizard:["#5a3d8a","#1b1033"], shop:["#1f6b4a","#0b2d1f"], tower:["#7a6a55","#2e261c"],
+ sky:["#4aa3d8","#1e4e7c"], dome:["#9aa7b8","#3e4a5c"], bridge:["#3c79b8","#162f55"], garden:["#6aa84f","#2c5a24"], station:["#a8443b","#4a1913"]
+};
+const CATNAME={plane:"Vuelo",bus:"Autobús",tube:"Trayecto",hotel:"Hotel",market:"Mercado",river:"Paseo",eye:"Mirador",bigben:"Icono",park:"Parque",palace:"Palacio",square:"Plaza",food:"Comida",lights:"Noche",pub:"Pub",screens:"Experiencia",night:"Noche",houses:"Barrio",museum:"Museo",balloon:"Reserva",sweets:"Dulces",sunset:"Atardecer",wizard:"Magia",shop:"Compras",tower:"Historia",sky:"Mirador",dome:"Catedral",bridge:"Puente",garden:"Jardín",station:"Estación"};
+
+// pictogramas en trazo blanco, viewBox 0 0 160 100 (centrados ~x80)
+const G={
+ plane:'<path d="M40 62l70-26c6-2 12 1 10 6-1 3-4 5-8 6L50 70z"/><path d="M78 47l-14-20h8l26 16"/><path d="M62 64l-6 14h7l16-18"/><path d="M44 66l-10-8"/>',
+ bus:'<rect x="48" y="30" width="64" height="44" rx="8"/><path d="M48 50h64M56 36h48"/><circle cx="62" cy="76" r="5"/><circle cx="98" cy="76" r="5"/>',
+ tube:'<circle cx="80" cy="48" r="20"/><rect x="50" y="43" width="60" height="10" fill="#fff" stroke="none" opacity=".9"/>',
+ hotel:'<rect x="52" y="28" width="56" height="50"/><path d="M60 38h8M76 38h8M92 38h8M60 50h8M76 50h8M92 50h8M74 78V64h12v14"/>',
+ market:'<path d="M44 44l8-16h56l8 16z"/><path d="M44 44c0 6 9 6 9 0 0 6 9 6 9 0 0 6 9 6 9 0 0 6 9 6 9 0 0 6 9 6 9 0 0 6 9 6 9 0 0 6 9 6 9 0"/><path d="M50 50v28h60V50"/><circle cx="66" cy="66" r="4"/><circle cx="80" cy="64" r="4"/><circle cx="94" cy="66" r="4"/>',
+ river:'<path d="M30 70c10-6 20 6 30 0s20 6 30 0 20 6 30 0 20 6 30 0"/><path d="M30 80c10-6 20 6 30 0s20 6 30 0 20 6 30 0"/><path d="M58 60V36l10-8 10 8v24M90 60V44h16v16"/>',
+ eye:'<circle cx="80" cy="44" r="26"/><circle cx="80" cy="44" r="3"/><path d="M80 18v52M54 44h52M62 26l36 36M98 26L62 62"/><path d="M68 80l12-36 12 36"/>',
+ bigben:'<path d="M70 82V34h20v48"/><path d="M68 34l12-16 12 16"/><path d="M80 18v-6"/><circle cx="80" cy="44" r="6"/><path d="M80 41v3l2 2"/><path d="M90 82V58h26v24M96 58v-6M110 58v-6"/>',
+ park:'<circle cx="64" cy="44" r="16"/><path d="M64 60v18"/><circle cx="98" cy="50" r="12"/><path d="M98 62v16"/><path d="M36 78h88"/>',
+ palace:'<path d="M40 78V46h80v32"/><path d="M40 46l40-14 40 14"/><path d="M52 54v18M64 54v18M76 54v18M88 54v18M100 54v18M112 54v18"/><path d="M80 32v-8"/><path d="M80 24h8l-2 3 2 3h-8"/>',
+ square:'<path d="M80 80V22"/><path d="M74 22h12M76 16h8"/><circle cx="80" cy="12" r="3"/><path d="M46 80h20l-4-10h-12zM94 80h20l-4-10h-12z"/><path d="M50 70c0-6 12-6 12 0M98 70c0-6 12-6 12 0"/>',
+ food:'<path d="M46 52h68c0 16-14 26-34 26S46 68 46 52z"/><path d="M62 44c0-6 6-6 6-12M80 44c0-6 6-6 6-12M98 44c0-6 6-6 6-12"/>',
+ lights:'<rect x="40" y="26" width="34" height="22" rx="2"/><rect x="80" y="20" width="40" height="28" rx="2"/><rect x="48" y="54" width="64" height="20" rx="2"/><path d="M80 80v-6"/>',
+ pub:'<path d="M62 34h32l-3 44H65z"/><path d="M94 42h6c6 0 6 18 0 18h-7"/><path d="M60 34c0-8 10-10 14-6 4-6 16-4 16 4"/>',
+ screens:'<path d="M36 74l22-46h44l22 46"/><path d="M58 28l-6 46M102 28l6 46M48 50h64"/><circle cx="80" cy="50" r="6"/>',
+ night:'<path d="M98 26a22 22 0 1 0 14 34 18 18 0 0 1-14-34z"/><circle cx="52" cy="30" r="1.6" fill="#fff"/><circle cx="64" cy="20" r="1.2" fill="#fff"/><circle cx="44" cy="48" r="1.2" fill="#fff"/><circle cx="122" cy="24" r="1.4" fill="#fff"/>',
+ houses:'<path d="M38 80V46l12-10 12 10v34M62 80V42l12-10 12 10v38M86 80V46l12-10 12 10v34M110 80V50l10-8 10 8v30"/><path d="M46 80V68h8v12M70 80V68h8v12M94 80V68h8v12"/>',
+ museum:'<path d="M42 44l38-18 38 18z"/><path d="M48 50v24M62 50v24M76 50v24M90 50v24M104 50v24M112 50v24"/><path d="M40 78h80M44 48h72"/>',
+ balloon:'<ellipse cx="70" cy="40" rx="14" ry="17"/><ellipse cx="94" cy="36" rx="12" ry="15"/><path d="M70 57l2 4-4 0zM94 51l2 4-4 0"/><path d="M70 61c4 8-4 12 6 20M94 55c-4 10 6 14-2 26"/>',
+ sweets:'<circle cx="80" cy="48" r="14"/><path d="M66 48l-14-10v20zM94 48l14-10v20z"/><path d="M72 42c4 4 12 4 16 0M72 54c4-4 12-4 16 0"/>',
+ sunset:'<path d="M30 78c30-30 70-30 100 0"/><circle cx="80" cy="48" r="14"/><path d="M80 24v-6M58 32l-4-4M102 32l4-4M48 48h-6M112 48h6"/>',
+ wizard:'<path d="M84 14L64 50h14l-6 34 26-42H84z"/><circle cx="46" cy="28" r="1.6" fill="#fff"/><circle cx="116" cy="22" r="1.6" fill="#fff"/><circle cx="124" cy="60" r="1.2" fill="#fff"/><circle cx="40" cy="64" r="1.2" fill="#fff"/>',
+ shop:'<path d="M54 40h52l-4 40H58z"/><path d="M68 40c0-14 24-14 24 0"/>',
+ tower:'<path d="M48 80V40h10v-8h8v8h8v-8h8v8h8v-8h8v8h10v40"/><path d="M72 80V64c0-8 16-8 16 0v16"/><path d="M60 50h6M94 50h6"/>',
+ sky:'<path d="M60 80V40l20-18 20 18v40"/><path d="M60 40c10 6 30 6 40 0"/><path d="M36 80V58h14v22M110 80V30h14v50"/><path d="M68 52h24M68 62h24"/>',
+ dome:'<path d="M54 80V56h52v24"/><path d="M58 56c0-22 44-22 44 0"/><path d="M80 34v-10M76 26h8"/><path d="M62 64v10M74 64v10M86 64v10M98 64v10"/>',
+ bridge:'<path d="M30 70h100"/><path d="M48 82V30l6-8 6 8v52M100 82V30l6-8 6 8v52"/><path d="M60 40h40M60 46h40"/><path d="M30 56c10 0 18-8 18-16M130 56c-10 0-18-8-18-16"/>',
+ garden:'<path d="M50 80V44c0-10 20-10 20 0v36M90 80V44c0-10 20-10 20 0v36"/><path d="M70 60h20"/><circle cx="62" cy="36" r="10"/><circle cx="104" cy="40" r="8"/><path d="M40 80h80"/>',
+ station:'<path d="M40 80V40h80v40"/><path d="M40 40l12-14h56l12 14"/><path d="M56 80V58c0-10 16-10 16 0v22M88 80V58c0-10 16-10 16 0v22"/><circle cx="80" cy="34" r="4"/>'
+};
+function scene(cat){
+  const night = ["night","lights","screens","wizard"].includes(cat);
+  const stars = night? Array.from({length:14},(_,i)=>`<circle cx="${(i*37)%160}" cy="${(i*23)%46+4}" r="${i%3?0.7:1.1}" fill="#fff" opacity=".7"/>`).join(""):"";
+  return `<svg class="scene" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  ${stars}<circle cx="132" cy="18" r="34" fill="#fff" opacity=".07"/><circle cx="20" cy="96" r="40" fill="#000" opacity=".08"/>
+  <path d="M0 92h12V80h6v12h8V72h10v20h10V84h8v8h14V78h4v14h20V82h8v10h16V74h8v18h12V80h8v12h16v8H0z" fill="#000" opacity=".16"/>
+  <g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,-4)">${G[cat]||G.tube}</g></svg>`;
+}
+
+/* ---------- itinerario ---------- */
+// tipo: "s" = sitio, "t" = trayecto. route: [["s","Estación"],["eliz","dir. X · 4 paradas"],["walk","13 min"]...]
+const DAYS=[
+{w:"Vie",n:9,color:"#DC241F",title:"Río, Westminster y West End",steps:[
+ {t:"07:30",c:"plane",k:"t",name:"Vuelo Faro → Stansted",where:"Ryanair · llegada 10:20",desc:"Arranca el viaje. Portugal y Londres tienen la misma hora, así que no hay que tocar el reloj.",tip:"Solo equipaje de mano: salís rápido. Tened el pasaporte a mano para el control."},
+ {t:"11:05",c:"bus",k:"t",name:"National Express a Stratford",where:"Stansted → Stratford City · llegada 11:50",desc:"Bus reservado. Os deja en la estación de autobuses de Stratford City, pegada a la estación de tren y al centro comercial Westfield.",route:[["s","Stansted Airport"],["nx","~45 min"],["s","Stratford City"]]},
+ {t:"12:05",c:"tube",k:"t",name:"Stratford → hotel",where:"Elizabeth line + 13 min a pie",desc:"En la estación de Stratford seguid los carteles morados del Elizabeth line hacia el este.",tip:"Plan B: Central line (dir. Hainault vía Newbury Park) hasta Gants Hill y 13 min andando.",route:[["s","Stratford"],["eliz","dir. Shenfield · 4 paradas · ~8 min"],["s","Ilford"],["walk","13 min por Cranbrook Rd"],["s","Park Hotel"]]},
+ {t:"12:30",c:"hotel",name:"Park Hotel Ilford",where:"327 Cranbrook Rd · enfrente de Valentines Park",desc:"Dejáis las maletas (el check-in es desde las 13:00) y salís directos hacia el río.",q:"Park Hotel Ilford 327 Cranbrook Road",route:[["s","Ilford"],["eliz","dir. Paddington/Heathrow · 4 paradas"],["s","Stratford"],["jubilee","dir. Stanmore · ~15 min"],["s","London Bridge"]]},
+ {t:"13:40",c:"market",name:"Borough Market",where:"Southwark · junto a London Bridge",desc:"El mercado de comida más antiguo de Londres, bajo estructuras de hierro victorianas y las vías del tren. Se come de pie, picando de puesto en puesto. Hoy viernes está a tope; los lunes cierra.",tip:"<b>Qué probar:</b> el toastie de queso de Kappacasein, un donut de Bread Ahead y lo que os llame en Borough Market Kitchen. <b>Al salir:</b> pinta opcional en The George Inn, una posada con galerías de madera a 2 min.",q:"Borough Market London"},
+ {t:"15:00",c:"river",name:"South Bank",where:"Orilla sur del Támesis · hacia el oeste",desc:"Paseo junto al río: catedral de Southwark, el barco Golden Hinde, el Shakespeare's Globe y la Tate Modern, una antigua central eléctrica convertida en museo gratis.",tip:"Subid a la <b>planta 10 de la Tate Modern</b> para tener vistas gratis. Haced la foto del <b>Millennium Bridge</b> con St Paul's al fondo.",q:"Tate Modern London"},
+ {t:"16:30",c:"eye",name:"London Eye",where:"South Bank · junto a Westminster Bridge",desc:"La noria de 135 m que se ha convertido en símbolo de la ciudad. Desde abajo se ve el Parlamento al otro lado del río.",tip:"Subir es de pago y sale más barato online. Si no subís, la foto desde el puente es la buena.",q:"London Eye"},
+ {t:"16:45",c:"bigben",name:"Big Ben y Westminster",where:"Westminster Bridge · Parliament Square",desc:"Cruzáis el puente hasta el Parlamento, la torre del Big Ben y la Abadía de Westminster, donde se coronan los reyes.",q:"Big Ben London"},
+ {t:"17:15",c:"park",name:"St James's Park",where:"Entre Westminster y Buckingham",desc:"El parque real más bonito del centro, con un lago con pelícanos y ardillas que se acercan. Desde el puente del lago se ve Buckingham entre los árboles.",q:"St James's Park London"},
+ {t:"17:35",c:"palace",name:"Buckingham Palace",where:"Final de The Mall",desc:"La residencia oficial del rey. Si la bandera real ondea, él está dentro. Después bajáis por The Mall, la avenida roja, hasta el Admiralty Arch.",q:"Buckingham Palace"},
+ {t:"18:05",c:"square",name:"Trafalgar Square",where:"Columna de Nelson · National Gallery",desc:"La gran plaza de Londres con sus cuatro leones de bronce. La pilláis justo al atardecer (~18:25).",q:"Trafalgar Square"},
+ {t:"18:30",c:"market",name:"Covent Garden y Neal's Yard",where:"West End",desc:"Mercado cubierto con artistas callejeros. A 5 min está Neal's Yard, un patio escondido de fachadas de colores, y Seven Dials.",tip:"Postre: <b>Ben's Cookies</b>, las galletas calientes más famosas de Londres.",q:"Neal's Yard London"},
+ {t:"19:30",c:"food",name:"Chinatown y Soho",where:"Gerrard St · Lisle St",desc:"Cena de picoteo barato bajo los farolillos rojos: <b>Bun House</b>, con bollos al vapor rellenos, y <b>Bunsik</b>, con street food coreano y corn dogs.",q:"Bun House Chinatown London"},
+ {t:"20:30",c:"lights",name:"Piccadilly Circus",where:"West End",desc:"Las pantallas gigantes de Piccadilly encendidas de noche. Seguid por Leicester Square y Carnaby Street.",q:"Piccadilly Circus"},
+ {t:"21:15",c:"pub",name:"Lamb & Flag",where:"Covent Garden · Rose Street",desc:"Uno de los pubs más antiguos del West End, metido en un callejón. Los viernes está lleno de gente tomando la pinta de pie en la calle.",tip:"Alternativa: The Sherlock Holmes, junto a Trafalgar.",q:"Lamb and Flag Covent Garden"},
+ {t:"22:15",c:"screens",name:"Outernet London",where:"Tottenham Court Road",desc:"Salas forradas de pantallas LED gigantes con contenido inmersivo. Es gratis, abre hasta tarde y no se parece a nada.",q:"Outernet London"},
+ {t:"22:45",c:"night",name:"Westminster de noche",where:"Whitehall → Westminster Bridge → South Bank",desc:"Unos 25 min andando para ver el Big Ben y el Parlamento iluminados y el London Eye encendido. Es una de las mejores vistas nocturnas de Londres.",q:"Westminster Bridge"},
+ {t:"00:00",c:"tube",k:"t",name:"Vuelta en Night Tube",where:"Viernes: Jubilee y Central toda la noche",desc:"Volvéis por Gants Hill, a 13 min del hotel. Llegáis hacia la 1:00.",tip:"Antes de las ~00:25 también vale el Elizabeth line desde Tottenham Court Rd (dir. Shenfield) hasta Ilford. De madrugada la Central pasa cada ~20 min.",route:[["s","Westminster"],["jubilee","dir. Stratford · ~20 min"],["s","Stratford"],["central","dir. Hainault vía Newbury Park · ~12 min"],["s","Gants Hill"],["walk","13 min"],["s","Park Hotel"]]}
+]},
+{w:"Sáb",n:10,color:"#2563C9",title:"Notting Hill, Pixar y Camden",steps:[
+ {t:"07:30",c:"tube",k:"t",name:"Hacia Notting Hill",where:"~50 min puerta a puerta",desc:"Salida temprano: el mercadillo de Portobello se llena a media mañana.",route:[["s","Ilford"],["eliz","dir. Paddington/Heathrow · ~30 min"],["s","Bond Street"],["central","dir. West Ruislip/Ealing B. · 4 paradas"],["s","Notting Hill Gate"]]},
+ {t:"08:40",c:"houses",name:"Casas de colores de Notting Hill",where:"Lancaster Rd · St Luke's Mews · Elgin Crescent",desc:"Las calles de casitas pastel que salen en la película. A primera hora están casi vacías y hay buena luz para las fotos.",q:"St Luke's Mews Notting Hill"},
+ {t:"09:15",c:"market",name:"Portobello Road Market",where:"Notting Hill",desc:"El sábado es el día grande: en la parte sur de la calle hay cientos de puestos de antigüedades, platería y cámaras viejas, y más arriba fruta y comida.",tip:"Desayunad en algún puesto. Buscad la tienda roja de <b>Alice's</b> y la librería azul de la peli.",q:"Portobello Road Market"},
+ {t:"10:30",c:"pub",name:"The Churchill Arms",where:"Kensington Church Street",desc:"El pub cubierto de flores, seguramente el más fotografiado de Londres. Abre sobre las 11:00, así que hoy es parada para la foto.",q:"The Churchill Arms Kensington"},
+ {t:"10:45",c:"park",name:"Kensington Gardens y Hyde Park",where:"Palacio de Kensington · Albert Memorial",desc:"Cruzáis el parque pasando por el Palacio de Kensington, el estanque Round Pond y el Albert Memorial dorado, hasta el Royal Albert Hall.",q:"Albert Memorial London"},
+ {t:"11:20",c:"museum",name:"Natural History Museum",where:"South Kensington · gratis",desc:"Una catedral victoriana llena de dinosaurios. En la Hintze Hall cuelga el esqueleto de una ballena azul, y hay sala de volcanes y simulador de terremotos.",tip:"Gratis, pero reservad franja online (~11:15–11:30) para entrar sin cola.",q:"Natural History Museum London"},
+ {t:"12:45",c:"tube",k:"t",name:"Rumbo a Wembley",where:"~40 min",desc:"Dos líneas y estáis en el estadio.",route:[["s","South Kensington"],["picc","dir. Cockfosters · 3 paradas"],["s","Green Park"],["jubilee","dir. Stanmore · ~22 min"],["s","Wembley Park"]]},
+ {t:"13:30",c:"food",name:"Boxpark Wembley",where:"Junto al estadio de Wembley",desc:"Contenedores de street food de todo tipo, rápido y a buen precio. Foto con el estadio.",q:"Boxpark Wembley"},
+ {t:"14:30",c:"balloon",name:"Mundo Pixar Experience",where:"Fulton Rd, Wembley Park · 5 min de la estación",desc:"La exposición inmersiva de Pixar más grande del mundo: 14 universos a tamaño real, del cuarto de Andy al Monstruos S.A., con olores y música en cada sala. Se recorre en 45–55 min.",tip:"<b>Reservad la franja de las 14:30.</b> Solo se vende online.",q:"Mundo Pixar Experience Wembley"},
+ {t:"15:30",c:"tube",k:"t",name:"De Wembley a Camden",where:"~40 min",desc:"Metropolitan hasta el centro y dos paradas de Northern.",route:[["s","Wembley Park"],["metro","dir. Aldgate · ~18 min"],["s","Euston Square"],["walk","3 min"],["s","Euston"],["northern","dir. Edgware o High Barnet · 2 paradas"],["s","Camden Town"]]},
+ {t:"16:15",c:"market",name:"Camden Market",where:"Stables · Camden Lock · Buck Street",desc:"El Londres alternativo: ropa vintage y punk en antiguos establos de caballos, el callejón de los paraguas y la estatua de Amy Winehouse.",tip:"Los puestos de ropa cierran sobre las 18:00–19:00; la comida y los bares siguen abiertos.",q:"Stables Market Camden"},
+ {t:"17:15",c:"sweets",name:"Hansel & Gretel y Regent's Canal",where:"Camden Lock",desc:"Una tienda de dulces de cuento y, al lado, el canal con barcazas pintadas y la esclusa de Camden Lock.",q:"Camden Lock"},
+ {t:"18:00",c:"sunset",name:"Primrose Hill",where:"15 min a pie desde Camden",desc:"Una colina con todo el skyline de Londres delante. El atardecer es hacia las 18:20.",q:"Primrose Hill viewpoint"},
+ {t:"19:15",c:"food",name:"Poppies Fish & Chips",where:"Camden · Hawley Crescent",desc:"El fish & chips clásico del viaje, con decoración de los años 50.",q:"Poppies Fish and Chips Camden"},
+ {t:"20:30",c:"pub",name:"The Hawley Arms",where:"Camden",desc:"Pub rockero mítico de Camden, al que iba Amy Winehouse. Ambiente joven los sábados.",tip:"Alternativa: The Good Mixer.",q:"The Hawley Arms Camden"},
+ {t:"22:00",c:"night",name:"Camden de noche",where:"Camden High St · Chalk Farm Rd",desc:"Bares con música en directo y el canal iluminado. Sin prisa: los sábados el metro funciona toda la noche.",q:"Camden High Street"},
+ {t:"00:00",c:"tube",k:"t",name:"Vuelta en Night Tube",where:"Sábado: Northern y Central toda la noche",desc:"Llegáis al hotel hacia la 1:00.",tip:"De madrugada la Northern solo va por el ramal Charing Cross. Antes de las ~00:25, en TCR podéis coger el Elizabeth (dir. Shenfield) hasta Ilford.",route:[["s","Camden Town"],["northern","ramal Charing Cross · 5 paradas"],["s","Tottenham Court Rd"],["central","dir. Hainault vía Newbury Park · ~30 min"],["s","Gants Hill"],["walk","13 min"],["s","Park Hotel"]]}
+]},
+{w:"Dom",n:11,color:"#6950A1",title:"King's Cross, Harrods y Harry Potter",steps:[
+ {t:"07:50",c:"tube",k:"t",name:"Hacia King's Cross",where:"~40 min",desc:"Temprano para hacer la foto del andén sin cola.",route:[["s","Ilford"],["eliz","dir. Paddington/Heathrow · ~22 min"],["s","Farringdon"],["circle","1 parada (cualquiera de las tres)"],["s","King's Cross St Pancras"]]},
+ {t:"08:35",c:"wizard",name:"Andén 9¾",where:"Estación de King's Cross",desc:"El carrito que atraviesa la pared, con bufandas de las cuatro casas para la foto, y la tienda oficial al lado.",tip:"Si no hay cola, la foto es gratis. Más tarde la cola puede ser larga.",q:"Platform 9 3/4 King's Cross"},
+ {t:"09:00",c:"station",name:"St Pancras",where:"Al lado de King's Cross",desc:"La estación más bonita de Londres: ladrillo rojo neogótico y una nave de hierro y cristal donde llega el Eurostar. Dentro está la estatua gigante de la pareja abrazándose.",q:"St Pancras International"},
+ {t:"10:00",c:"museum",name:"British Museum",where:"Bloomsbury · 20 min a pie · gratis",desc:"Dos millones de años de historia: la Piedra de Rosetta, las momias egipcias, los frisos del Partenón y el Gran Atrio con techo de cristal.",tip:"Abre a las 10:00. La franja gratis online ayuda a entrar antes.",q:"British Museum"},
+ {t:"11:30",c:"tube",k:"t",name:"Hacia Harrods",where:"~15 min",desc:"Directo en Piccadilly.",route:[["s","Russell Square"],["picc","dir. Heathrow/Uxbridge · 7 paradas"],["s","Knightsbridge"]]},
+ {t:"11:50",c:"shop",name:"Harrods",where:"Knightsbridge · domingo desde ~11:30",desc:"Los grandes almacenes más famosos del mundo. No os perdáis los Food Halls, la escalera egipcia ni la planta de juguetes.",tip:"Evitad mochilas grandes.",q:"Harrods London"},
+ {t:"12:40",c:"houses",name:"Chelsea · King's Road",where:"Sloane Square",desc:"El barrio elegante: Sloane Street, Sloane Square y King's Road, con callejuelas de casitas de colores.",tip:"Comida rápida en King's Road hacia las 13:15.",q:"King's Road Chelsea"},
+ {t:"14:05",c:"tube",k:"t",name:"Hacia Euston",where:"~25 min",desc:"Rumbo al tren de Harry Potter.",route:[["s","Sloane Square"],["district","o Circle · dir. este · 1 parada"],["s","Victoria"],["victoria","dir. Walthamstow · 4 paradas"],["s","Euston"]]},
+ {t:"14:45",c:"tube",k:"t",name:"Tren a Watford Junction",where:"~20 min · vale el contactless",desc:"Coged el directo de London Northwestern (en las pantallas pone Watford Junction).",tip:"El Overground también va a Watford, pero tarda más del doble.",route:[["s","Euston"],["lnwr","directo · ~20 min"],["s","Watford Junction"],["shuttle","incluida en la entrada · ~15 min"],["s","Studio Tour"]]},
+ {t:"16:30",c:"wizard",name:"Warner Bros. Studio Tour",where:"The Making of Harry Potter · entrada 16:30",desc:"Los decorados reales de las películas: el Gran Comedor, el Callejón Diagon, el andén con el Expreso de Hogwarts y la maqueta gigante del castillo. Coincide con la temporada Dark Arts.",tip:"Llegad 20–30 min antes. Probad la cerveza de mantequilla. Calculad 3–3,5 h.",q:"Warner Bros Studio Tour London"},
+ {t:"20:15",c:"tube",k:"t",name:"Vuelta a Londres",where:"Directos al río",desc:"Lanzadera, tren y Northern hasta London Bridge.",route:[["s","Studio Tour"],["shuttle",""],["s","Watford Junction"],["lnwr","~20 min"],["s","Euston"],["northern","ramal Bank (via Bank) · ~12 min"],["s","London Bridge"]]},
+ {t:"21:30",c:"pub",name:"The Anchor Bankside",where:"Orilla sur, junto a Southwark Bridge",desc:"Pub histórico a orillas del Támesis, perfecto para cenar mirando la City.",tip:"Si ya cenasteis en Harry Potter, pasad directamente al paseo.",q:"The Anchor Bankside"},
+ {t:"22:15",c:"bridge",name:"Tower Bridge iluminado",where:"More London · junto al Shard",desc:"El puente más bonito de Londres de noche, con los rascacielos de la City enfrente. Cruzadlo a pie.",q:"Tower Bridge"},
+ {t:"23:15",c:"tube",k:"t",name:"Vuelta al hotel",where:"~35 min",desc:"Los domingos no hay Night Tube y los últimos trenes salen antes.",tip:"Mirad en Citymapper cuál es el último Elizabeth hacia Ilford y no lo apuréis.",route:[["s","Tower Hill"],["district","dir. este · 2 paradas"],["s","Whitechapel"],["eliz","dir. Shenfield · ~12 min"],["s","Ilford"],["walk","13 min"],["s","Park Hotel"]]}
+]},
+{w:"Lun",n:12,color:"#E07A10",title:"La City y vuelta a casa",steps:[
+ {t:"07:30",c:"hotel",name:"Check-out",where:"Park Hotel",desc:"Dejad las maletas en recepción (pedidlo el primer día). Volvéis a por ellas a las ~15:00.",q:"Park Hotel Ilford 327 Cranbrook Road"},
+ {t:"07:45",c:"tube",k:"t",name:"Hacia la Torre de Londres",where:"~30 min",desc:"Coged la District en Whitechapel, porque la Hammersmith & City no para en Tower Hill.",route:[["s","Ilford"],["eliz","dir. Paddington/Heathrow · 5 paradas"],["s","Whitechapel"],["district","dir. oeste · 2 paradas"],["s","Tower Hill"]]},
+ {t:"08:15",c:"tower",name:"Torre de Londres",where:"Tower Hill",desc:"Fortaleza de casi 1.000 años donde se guardan las Joyas de la Corona y viven los cuervos. Se rodea por fuera junto al foso.",q:"Tower of London"},
+ {t:"08:45",c:"bridge",name:"Tower Bridge y Shad Thames",where:"Cruce a pie",desc:"Cruzáis el puente y bajáis a Shad Thames, antiguos almacenes unidos por pasarelas de hierro. Desde ahí se ven el Shard y la City.",q:"Shad Thames"},
+ {t:"09:30",c:"garden",name:"St Dunstan in the East",where:"A 5 min de la Torre · gratis",desc:"Un jardín dentro de una iglesia bombardeada en la Segunda Guerra Mundial, con enredaderas entre los arcos góticos. Un rincón muy bonito y poco conocido.",q:"St Dunstan in the East"},
+ {t:"10:00",c:"sky",name:"The Garden at 120",where:"120 Fenchurch St · planta 15",desc:"Azotea con jardín, gratis y sin reserva, con vistas a la Torre, Tower Bridge, el Shard y el Walkie-Talkie. Sustituye al Sky Garden, que está agotado.",tip:"Si os sale una cancelación en <b>Horizon 22</b> (planta 58, el mirador gratis más alto), id allí.",q:"The Garden at 120 Fenchurch Street"},
+ {t:"10:45",c:"sky",name:"Rascacielos y Leadenhall Market",where:"La City",desc:"Ruta entre el Gherkin, el edificio Lloyd's y el Cheesegrater hasta Leadenhall Market, el mercado victoriano que sale como Callejón Diagon en la primera peli de Harry Potter.",q:"Leadenhall Market"},
+ {t:"11:45",c:"dome",name:"One New Change y St Paul's",where:"Terraza gratis en la azotea",desc:"Subid a la terraza del centro comercial One New Change: tenéis la cúpula de St Paul's enfrente. Luego dad la vuelta a la catedral (entrar es de pago).",q:"One New Change roof terrace"},
+ {t:"12:25",c:"bridge",name:"Millennium Bridge",where:"St Paul's ↔ Tate Modern",desc:"El puente peatonal de acero desde el que se hace la foto clásica de St Paul's.",q:"Millennium Bridge London"},
+ {t:"12:55",c:"pub",name:"Ye Olde Cheshire Cheese",where:"Fleet Street",desc:"Pub reconstruido tras el Gran Incendio de 1666, con salas oscuras de madera por las que pasaron Dickens y otros escritores. Es de Samuel Smith's, de lo más barato del centro.",tip:"Pie o fish &amp; chips y pinta de despedida.",q:"Ye Olde Cheshire Cheese"},
+ {t:"14:15",c:"tube",k:"t",name:"Vuelta a por las maletas",where:"~40 min",desc:"Recoged las maletas hacia las 15:00.",route:[["walk","12 min"],["s","Farringdon"],["eliz","dir. Shenfield · ~20 min"],["s","Ilford"],["walk","13 min"],["s","Park Hotel"]]},
+ {t:"15:58",c:"tube",k:"t",name:"Tren a Southend Airport",where:"Trainline · llegada 17:03",desc:"Estad en el andén de Ilford hacia las 15:40. La estación de Southend Airport está pegada a la terminal.",tip:"El cambio es en <b>Shenfield</b>. Os bajáis en Southend Airport, una parada antes de Southend Victoria.",route:[["s","Ilford"],["eliz","dir. Shenfield"],["s","Shenfield"],["ga","dir. Southend Victoria"],["s","Southend Airport"]]},
+ {t:"20:05",c:"plane",k:"t",name:"Vuelo Southend → Faro",where:"easyJet · llegada 23:00",desc:"Fin del viaje. Cenad algo en el aeropuerto antes de embarcar.",tip:"easyJet cierra la entrega de maletas 40 min antes y el embarque 30 min antes."}
+]}
+];
+
+/* ---------- estado ---------- */
+let state={d:0,i:0};
+try{const s=JSON.parse(localStorage.getItem("ldn-pos")||"null"); if(s&&DAYS[s.d]&&DAYS[s.d].steps[s.i]) state=s;}catch(e){}
+const h=(location.hash||"").replace("#","");
+if(/^dia[1-4]$/.test(h)) state={d:+h[3]-1,i:0};
+const $=id=>document.getElementById(id);
+function save(){try{localStorage.setItem("ldn-pos",JSON.stringify(state))}catch(e){}}
+
+function mapsUrl(st){const q=encodeURIComponent((st.q||st.name)+" London");return `https://www.google.com/maps/dir/?api=1&destination=${q}&travelmode=transit`;}
+function photosUrl(st){return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent((st.q||st.name)+" London")}`;}
+
+function routeHTML(r){
+  let out="";
+  for(let k=0;k<r.length;k++){
+    const [type,txt]=r[k];
+    if(type==="s"){
+      const nxt=r[k+1];
+      let bar="";
+      if(nxt){ if(nxt[0]==="walk") bar='<div class="bar walk"></div>'; else if(nxt[0]!=="s") bar=`<div class="bar" style="background:${LN[nxt[0]][1]}"></div>`; }
+      const seg = nxt && nxt[0]!=="s" ? (nxt[0]==="walk" ? `<div class="di">🚶 ${nxt[1]}</div>` : `<span class="ln" style="background:${LN[nxt[0]][1]};color:${LN[nxt[0]][2]}">${LN[nxt[0]][0]}</span><div class="di">${nxt[1]||""}</div>`) : "";
+      out+=`<div class="rs"><div class="rail"><span class="dot"></span>${bar}</div><div><div class="st">${txt}</div>${seg}</div></div>`;
+    }
+  }
+  return `<div class="route">${out}</div>`;
+}
+
+function render(){
+  const D=DAYS[state.d], st=D.steps[state.i];
+  document.documentElement.style.setProperty("--day",D.color);
+  // días
+  $("days").innerHTML=DAYS.map((x,j)=>`<button role="tab" type="button" aria-selected="${j===state.d}" style="--d:${x.color}" data-d="${j}"><span class="w">${x.w}</span><span class="n">${x.n}</span></button>`).join("");
+  // línea
+  $("tube").innerHTML=D.steps.map((s,j)=>`<button class="stop ${s.k==="t"?"leg":""} ${j<state.i?"done":""}" type="button" data-i="${j}" aria-label="${s.t} ${s.name}" ${j===state.i?'aria-current="true"':""}><span></span></button>`).join("");
+  const cur=$("tube").children[state.i]; if(cur) cur.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
+  $("dayTitle").innerHTML=`<b>${D.title}</b> · ${state.i+1}/${D.steps.length}`;
+  // tarjeta
+  const [c1,c2]=SC[st.c]||SC.tube;
+  const isLeg=st.k==="t";
+  $("main").innerHTML=`<article class="card fade">
+   <div class="post" style="--c1:${c1};--c2:${c2}">${scene(st.c)}<span class="time">${st.t}</span><span class="cat">${CATNAME[st.c]||""}</span><span class="stamp">${D.w} ${D.n} oct · Londres</span></div>
+   <div class="body"><h2>${st.name}</h2>${st.where?`<div class="where">${st.where}</div>`:""}
+   <p class="desc">${st.desc}</p>
+   ${st.tip?`<div class="tip">${st.tip}</div>`:""}
+   ${st.route?routeHTML(st.route):""}
+   ${!isLeg||st.q?`<div class="actions">
+     <a class="act primary" href="${mapsUrl(st)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Cómo llegar</a>
+     <a class="act" href="${photosUrl(st)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Ver fotos</a></div>`:""}
+   </div></article>`;
+  // navegación
+  const nextStep=D.steps[state.i+1];
+  $("prev").disabled = state.d===0 && state.i===0;
+  if(nextStep){ $("nextLbl").textContent=`Siguiente · ${nextStep.t}`; $("nextName").textContent=nextStep.name; $("next").disabled=false; }
+  else if(state.d<DAYS.length-1){ $("nextLbl").textContent="Siguiente día"; $("nextName").textContent=`${DAYS[state.d+1].w} ${DAYS[state.d+1].n} · ${DAYS[state.d+1].title}`; $("next").disabled=false; }
+  else { $("nextLbl").textContent="Fin del viaje"; $("nextName").textContent="¡Buen vuelo! ✈"; $("next").disabled=true; }
+  save();
+}
+function go(d,i){state={d,i};render();window.scrollTo({top:0,behavior:"smooth"});}
+function next(){const D=DAYS[state.d]; if(state.i<D.steps.length-1) go(state.d,state.i+1); else if(state.d<DAYS.length-1) go(state.d+1,0);}
+function prev(){ if(state.i>0) go(state.d,state.i-1); else if(state.d>0) go(state.d-1,DAYS[state.d-1].steps.length-1);}
+
+$("days").addEventListener("click",e=>{const b=e.target.closest("button"); if(b) go(+b.dataset.d,0);});
+$("tube").addEventListener("click",e=>{const b=e.target.closest(".stop"); if(b) go(state.d,+b.dataset.i);});
+$("next").addEventListener("click",next); $("prev").addEventListener("click",prev);
+document.addEventListener("keydown",e=>{ if($("sheet").hidden){ if(e.key==="ArrowRight") next(); if(e.key==="ArrowLeft") prev(); } else if(e.key==="Escape") $("sheet").hidden=true; });
+// deslizar
+let sx=null,sy=null;
+$("main").addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+$("main").addEventListener("touchend",e=>{ if(sx===null) return; const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){ dx<0?next():prev(); } sx=null; },{passive:true});
+// lista
+function openList(){
+  const D=DAYS[state.d];
+  $("panel").innerHTML=`<h3>${D.w} ${D.n} · ${D.title}</h3>`+D.steps.map((s,j)=>`<button class="li ${s.k==="t"?"leg":""}" type="button" data-i="${j}" ${j===state.i?'aria-current="true"':""}><span class="t">${s.t}</span><span class="d"></span><span class="n">${s.name}<small>${s.where||""}</small></span></button>`).join("");
+  $("sheet").hidden=false;
+}
+$("openList").addEventListener("click",openList); $("listBtn").addEventListener("click",openList);
+$("sheet").addEventListener("click",e=>{ const b=e.target.closest(".li"); if(b){ $("sheet").hidden=true; go(state.d,+b.dataset.i); } else if(e.target===$("sheet")) $("sheet").hidden=true; });
+render();
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
+</script>
+
+</body>
+</html>
