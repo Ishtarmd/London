@@ -563,8 +563,7 @@ function renderMap(){
   if(typeof L==="undefined"){ $("map").hidden=true; document.querySelector(".mapbar").hidden=true; $("mapNote").textContent="El mapa interactivo funciona en la versión instalada (GitHub). Aquí tienes la lista del día con enlaces a Google Maps."; return; }
   if(!map){
     map=L.map("map",{zoomControl:false,attributionControl:true});
-    const dark=matchMedia("(prefers-color-scheme: dark)").matches;
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,{maxZoom:19,attribution:'© OpenStreetMap · © CARTO'}).addTo(map);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(map);
     L.control.zoom({position:"bottomright"}).addTo(map);
   }
   if(layer) layer.remove();
@@ -576,9 +575,9 @@ function renderMap(){
     m.bindPopup(`<b>${x.s.t} · ${x.s.name}</b><br><a href="#" data-go="${x.i}">Ver en la ruta ›</a> · <a href="${mapsUrl(x.s)}" target="_blank" rel="noopener">Cómo llegar</a>`);
   });
   // tramo largo (Wembley / Watford) separado para no dibujar líneas engañosas
-  const far=ll=>ll[1]<-0.25;
+  const far=ll=>ll[1]<-0.25||ll[1]>-0.03; // Wembley/Watford y el hotel (Ilford) quedan fuera del zoom y de la línea
   let seg=[]; const segs=[];
-  pts.forEach(x=>{ if(seg.length&&far(seg[seg.length-1])!==far(x.s.ll)){segs.push(seg);seg=[];} seg.push(x.s.ll); }); if(seg.length) segs.push(seg);
+  pts.forEach(x=>{ if(far(x.s.ll)){ if(seg.length){segs.push(seg);seg=[];} return; } seg.push(x.s.ll); }); if(seg.length) segs.push(seg);
   segs.forEach(sg=>{ if(sg.length>1) L.polyline(sg,{color:D.color,weight:4,opacity:.8,dashArray:"8 8"}).addTo(layer); });
   setTimeout(()=>{ map.invalidateSize(); const near=lls.filter(ll=>!far(ll)); map.fitBounds(L.latLngBounds(near.length?near:lls),{padding:[30,30]}); },60);
 }
