@@ -377,9 +377,10 @@ const DAYS=[
  {t:"16:50",c:"market",name:"Camden Market",where:"Stables · Camden Lock · Buck Street",desc:"El Londres alternativo: ropa vintage y punk en antiguos establos de caballos, el callejón de los paraguas y la estatua de Amy Winehouse.",tip:"Los puestos de ropa cierran sobre las 18:00–19:00, así que id primero a lo que más os interese. La comida y los bares siguen abiertos.",q:"Stables Market Camden"},
  {t:"18:00",c:"sweets",name:"Hansel & Gretel y Regent's Canal",where:"Camden Lock",desc:"Una tienda de dulces de cuento y, al lado, el canal con barcazas pintadas y la esclusa de Camden Lock.",q:"Camden Lock"},
  {t:"19:15",c:"food",name:"Poppies Fish & Chips",where:"Camden · Hawley Crescent",desc:"El fish & chips clásico del viaje, con decoración de los años 50.",q:"Poppies Fish and Chips Camden"},
- {t:"20:30",c:"pub",name:"The Hawley Arms",where:"Camden",desc:"Pub rockero mítico de Camden, al que iba Amy Winehouse. Ambiente joven los sábados.",tip:"Alternativa: The Good Mixer.",q:"The Hawley Arms Camden"},
- {t:"22:00",c:"night",name:"Camden de noche",where:"Camden High St · Chalk Farm Rd",desc:"Bares con música en directo y el canal iluminado. Sin prisa: los sábados el metro funciona toda la noche.",q:"Camden High Street"},
- {t:"00:00",c:"tube",k:"t",name:"Vuelta en Night Tube",where:"Sábado: Northern y Central toda la noche",desc:"Llegáis al hotel hacia la 1:00.",tip:"De madrugada la Northern solo va por el ramal Charing Cross. Antes de las ~00:25, en TCR podéis coger el Elizabeth (dir. Shenfield) hasta Ilford.",route:[["s","Camden Town"],["northern","ramal Charing Cross · 5 paradas"],["s","Tottenham Court Rd"],["central","dir. Hainault vía Newbury Park · ~30 min"],["s","Gants Hill"],["walk","13 min"],["s","Park Hotel"]]}
+ {t:"20:15",c:"pub",name:"The Hawley Arms",where:"Camden",desc:"Pub rockero mítico de Camden, al que iba Amy Winehouse. Ambiente joven los sábados.",tip:"Alternativa: The Good Mixer.",q:"The Hawley Arms Camden"},
+ {t:"21:00",c:"tube",k:"t",name:"Hacia Knightsbridge",where:"~25 min",desc:"Northern hasta Leicester Square y Piccadilly directa a Knightsbridge.",route:[["s","Camden Town"],["northern","ramal Charing Cross · 6 paradas"],["s","Leicester Square"],["picc","dir. Heathrow/Uxbridge · 5 paradas"],["s","Knightsbridge"]]},
+ {t:"21:30",c:"lights",name:"Harrods iluminado",where:"Brompton Road · Knightsbridge",desc:"De noche, la fachada de terracota de Harrods se enciende con miles de bombillas que dibujan cada ventana y cada cúpula. Es una de las fotos nocturnas más bonitas de Londres.",tip:"La mejor foto, desde la acera de enfrente de Brompton Road. Si os sobra tiempo, seguid 10 min hasta <b>Hyde Park Corner</b> para ver el Wellington Arch iluminado.",q:"Harrods"},
+ {t:"22:15",c:"tube",k:"t",name:"De Knightsbridge al hotel",where:"~45 min · los sábados hay Night Tube",desc:"Piccadilly hasta Holborn y Central directa a Gants Hill. Llegáis hacia las 23:15, o más tarde si os quedáis: los sábados ambas líneas funcionan toda la noche.",tip:"Antes de medianoche también vale el Elizabeth desde Tottenham Court Road (dir. Shenfield) hasta Ilford.",route:[["s","Knightsbridge"],["picc","dir. Cockfosters · 6 paradas"],["s","Holborn"],["central","dir. Hainault vía Newbury Park · ~30 min"],["s","Gants Hill"],["walk","13 min"],["s","Park Hotel"]]}
 ]},
 {w:"Dom",n:11,color:"#6950A1",title:"King's Cross, Soho y Harry Potter",steps:[
  {t:"07:50",c:"tube",k:"t",name:"Hacia King's Cross",where:"~40 min",desc:"Temprano para hacer la foto del andén sin cola.",route:[["s","Ilford"],["eliz","dir. Paddington/Heathrow · ~22 min"],["s","Farringdon"],["circle","1 parada (cualquiera de las tres)"],["s","King's Cross St Pancras"]]},
@@ -456,6 +457,7 @@ const X={
  "primrose-hill":{ll:[51.5394,-0.1609],opt:1,rain:"Saltadlo: con nubes bajas no se ve el skyline. Más tiempo en Camden."},
  "poppies-fish-y-chips":{ll:[51.5404,-0.1446],eat:[["Poppies","Fish & chips","Poppies Camden"]]},
  "the-hawley-arms":{ll:[51.5407,-0.1449]},
+ "harrods-iluminado":{ll:[51.4994,-0.1632],rain:"Foto rápida desde la marquesina de la entrada y metro en Knightsbridge, justo al lado."},
  "camden-de-noche":{ll:[51.5390,-0.1426],rain:"Bares con música en directo bajo techo en Camden High Street."},
  "anden-9":{ll:[51.5322,-0.1240],eat:[["Dishoom King's Cross","Desayuno indio: el bacon naan roll es famoso","Dishoom King's Cross"],["Coal Drops Yard","Cafés y tiendas","Coal Drops Yard"]]},
  "st-pancras":{ll:[51.5308,-0.1260],opt:1},
@@ -611,7 +613,7 @@ const WT={
  "westminster-de-noche":"Palace of Westminster","leake-street-graffiti-tunnel":["Leake Street graffiti tunnel","Leake"],
  "casas-de-colores-de-notting-hill":"Notting Hill","portobello-road-market":"Portobello Road","the-hummingbird-bakery":["Hummingbird Bakery London","Hummingbird"],
  "the-churchill-arms":["Churchill Arms Kensington pub","Churchill Arms"],"kensington-gardens-y-hyde-park":"Kensington Gardens","natural-history-museum":"Natural History Museum, London",
- "harrods":"Harrods","chelsea-king-s-road":"King's Road","peggy-porschen":["Peggy Porschen","Porschen"],"abbey-road":"Abbey Road","primrose-hill":"Primrose Hill",
+ "harrods":"Harrods","harrods-iluminado":"Harrods","hacia-knightsbridge":{c:["Knightsbridge tube station","Piccadilly line"]},"de-knightsbridge-al-hotel":{c:["Knightsbridge tube station","Holborn tube station"]},"chelsea-king-s-road":"King's Road","peggy-porschen":["Peggy Porschen","Porschen"],"abbey-road":"Abbey Road","primrose-hill":"Primrose Hill",
  "camden-market":"Camden Market","hansel-y-gretel-y-regent-s-canal":"Regent's Canal","the-hawley-arms":["Hawley Arms Camden","Hawley"],"camden-de-noche":"Camden Town",
  "anden-9":"King's Cross railway station","st-pancras":"St Pancras railway station","british-museum":"British Museum","hamleys":"Hamleys","liberty-y-carnaby-street":"Liberty (department store)",
  "comida-en-kingly-court":"Carnaby Street","warner-bros-studio-tour":"Warner Bros. Studio Tour London","the-anchor-bankside":["The Anchor Bankside pub","Anchor"],"tower-bridge-iluminado":"Tower Bridge",

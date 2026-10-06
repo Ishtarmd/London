@@ -1,5 +1,5 @@
 // Guarda la app en el móvil para que funcione sin conexión
-const CACHE = "londres-v7";
+const CACHE = "londres-v8";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png",
   "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js", "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"];
 const LIVE = ["api.open-meteo.com", "api.frankfurter.app"];   // primero red, luego copia guardada
