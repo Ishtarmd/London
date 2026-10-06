@@ -102,9 +102,11 @@ details.planb summary::-webkit-details-marker{display:none}
 details.planb p{margin:6px 0 0}
 .eat{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
 .eat h4{margin:0 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.eat a{display:flex;justify-content:space-between;gap:10px;text-decoration:none;color:var(--fg);padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.eat a{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center;text-decoration:none;color:var(--fg);padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.eat .th{width:52px;height:52px;border-radius:10px;background:var(--chip) center/cover no-repeat;display:grid;place-items:center;font-size:20px}
+.eat .tx{min-width:0;display:flex;flex-direction:column}
 .eat a:last-child{border-bottom:none}
-.eat a span{color:var(--muted);font-size:12.5px;text-align:right}
+.eat a .tx span{color:var(--muted);font-size:12.5px}
 .route{margin-top:14px;display:flex;flex-direction:column}
 .rs{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:stretch}
 .rs .rail{display:flex;flex-direction:column;align-items:center}
@@ -579,18 +581,19 @@ function renderRoute(){
     ${st.where?`<div class="where">${st.where}${st.opt?" · <b>opcional</b>":""}</div>`:""}
     ${late?`<div class="box late">⏱️ <b>Vais unos ${late.min} min tarde</b> respecto al plan.${late.skip.length?` Para recuperar tiempo, podéis saltaros: <b>${late.skip.join(", ")}</b>.`:""}</div>`:""}
     <p class="desc">${st.desc}</p>
-    ${isLeg?"":`<div class="gal" id="gal" hidden></div>`}
+    <div class="gal" id="gal" hidden></div>
     ${st.tip?`<div class="box tip">${st.tip}</div>`:""}
     ${st.rain?`<details class="box planb" ${wet?"open":""}><summary>☔ Plan B si llueve${wet?` · lluvia probable (${hw.p}%)`:""}</summary><p>${st.rain}</p></details>`:""}
     ${st.route?routeHTML(st.route):""}
-    ${st.eat?`<div class="eat"><h4>🍴 Cerca para comer o beber</h4>${st.eat.map(e=>`<a href="${placeUrl(e[2])}" target="_blank" rel="noopener"><b>${e[0]}</b><span>${e[1]}</span></a>`).join("")}</div>`:""}
+    ${st.eat?`<div class="eat"><h4>🍴 Cerca para comer o beber</h4>${st.eat.map(e=>`<a href="${placeUrl(e[2])}" target="_blank" rel="noopener"><span class="th" data-eat="${esc(e[0])}">🍴</span><span class="tx"><b>${e[0]}</b><span>${e[1]}</span></span></a>`).join("")}</div>`:""}
     ${!isLeg?`<div class="actions">
      <a class="act primary" href="${mapsUrl(st)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Cómo llegar</a>
      <a class="act" href="${photosUrl(st)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Ver fotos</a></div>
     <details class="notes" ${notes[st.id]?"open":""}><summary>📝 Notas${notes[st.id]?" ·  guardadas":""}</summary><textarea id="noteTa" placeholder="Qué os ha gustado, qué habéis comprado, a quién le debéis una pinta…">${esc(notes[st.id]||"")}</textarea></details>`:""}
    </div></article>`;
   const ta=$("noteTa"); if(ta) ta.oninput=()=>{ notes[st.id]=ta.value; if(!ta.value) delete notes[st.id]; LS.set("ldn-notes",notes); };
-  if(!isLeg&&WT[st.id]){ const c=PH[st.id]; if(c!==undefined) showPhotos(st,c); else wikiPhotos(st.id).then(d=>showPhotos(st,d)); }
+  if(WT[st.id]){ const c=PH[st.id]; if(c!==undefined) showPhotos(st,c); else wikiPhotos(st.id).then(d=>showPhotos(st,d)); }
+  document.querySelectorAll("#v-ruta [data-eat]").forEach(el=>{ const k="eat:"+el.dataset.eat; const put=d=>{ if(d&&d.list[0]){ el.style.backgroundImage=`url("${d.list[0]}")`; el.textContent=""; } }; const c=PH[k]; if(c!==undefined) put(c); else wikiPhotos(k,true).then(put); });
   const vb=$("visitBtn"); if(vb) vb.onclick=()=>{ visited.has(st.id)?visited.delete(st.id):visited.add(st.id); LS.set("ldn-visited",[...visited]); if(visited.has(st.id)) toast("Marcado como visitado ✓"); renderTube(); renderRoute(); };
   const nextStep=D.steps[state.i+1];
   $("prev").disabled=state.d===0&&state.i===0;
@@ -613,33 +616,64 @@ const WT={
  "anden-9":"King's Cross railway station","st-pancras":"St Pancras railway station","british-museum":"British Museum","hamleys":"Hamleys","liberty-y-carnaby-street":"Liberty (department store)",
  "comida-en-kingly-court":"Carnaby Street","warner-bros-studio-tour":"Warner Bros. Studio Tour London","the-anchor-bankside":["The Anchor Bankside pub","Anchor"],"tower-bridge-iluminado":"Tower Bridge",
  "beigel-bake":["Beigel Bake Brick Lane","Beigel"],"street-art-de-brick-lane-y-shoreditch":"Brick Lane","torre-de-londres":"Tower of London","tower-bridge-y-shad-thames":"Shad Thames",
- "st-dunstan-in-the-east":"St Dunstan-in-the-East","the-garden-at-120":"120 Fenchurch Street","rascacielos-y-leadenhall-market":"Leadenhall Market",
+ "st-dunstan-in-the-east":"St Dunstan-in-the-East",
+ "vuelo-faro-stansted":"London Stansted Airport","national-express-a-stratford":{c:["National Express Coaches","Stratford City bus station"]},"stratford-hotel":"Elizabeth line",
+ "park-hotel-ilford":{c:["Valentines Park","Ilford"]},"check-out":{c:["Valentines Mansion","Valentines Park"]},"hacia-wembley":"Jubilee line",
+ "mundo-pixar-experience":{c:["Wembley Park","Wembley Stadium"]},"vuelta-al-centro":{c:["Green Park tube station","Green Park"]},"vuelta-en-night-tube":{c:["Night Tube","London Underground"]},
+ "hacia-notting-hill":{c:["Notting Hill Gate tube station","Central line (London Underground)"]},"hacia-abbey-road":{c:["St John's Wood tube station","Jubilee line"]},
+ "paseo-hasta-camden":{c:["Chalcot Square","Primrose Hill"]},"poppies-fish-y-chips":{c:[["Poppies fish and chips Camden","Poppies"],"Fish and chips"]},
+ "hacia-king-s-cross":{c:["Farringdon station","Elizabeth line"]},"hacia-euston":{c:["Victoria line","Oxford Circus tube station"]},"tren-a-watford-junction":{c:["Watford Junction railway station","Euston railway station"]},
+ "vuelta-a-londres":{c:["Euston railway station","London Bridge station"]},"vuelta-al-hotel":{c:["Tower Hill tube station","Elizabeth line"]},"hacia-brick-lane":{c:["Liverpool Street station","Elizabeth line"]},
+ "hacia-la-torre-de-londres":{c:["Aldgate East tube station","District line"]},"vuelta-a-por-las-maletas":{c:["Ilford railway station","Elizabeth line"]},
+ "tren-a-southend-airport":{c:["Southend Airport railway station","Shenfield railway station","Greater Anglia (train operating company)"]},"vuelo-southend-faro":"London Southend Airport","the-garden-at-120":"120 Fenchurch Street","rascacielos-y-leadenhall-market":"Leadenhall Market",
  "one-new-change-y-st-paul-s":"St Paul's Cathedral","millennium-bridge":"Millennium Bridge, London","ye-olde-cheshire-cheese":"Ye Olde Cheshire Cheese"
 };
 const IS_ART=false; // versión del enlace de Claude: allí no se pueden cargar fotos externas
+// fotos de los sitios de comida (si no tienen artículo propio, la del plato típico)
+const EW={
+ "The Great Spoon of Ilford":{c:["J D Wetherspoon","Pub"]},"Tesco / Sainsbury's de Ilford":{c:["Meal deal","Sandwich"]},"Kappacasein":{c:["Toasted sandwich","Raclette"]},
+ "Bread Ahead":"Doughnut","Padella":{c:["Pappardelle","Pasta"]},"Southbank Centre Food Market":"Southbank Centre","Seven Dials Market":"Seven Dials",
+ "Ben's Cookies":"Chocolate chip cookie","Bun House":"Baozi","Bunsik":"Corn dog","Four Seasons":{c:["Siu mei","Roast duck"]},
+ "Flat Iron (Covent Garden)":{c:["Flat iron steak","Steak"]},"Flat Iron (Beak St)":{c:["Flat iron steak","Steak"]},"Puestos de Portobello":"Portobello Road",
+ "Gail's Bakery":"Croissant","Cafés del museo":"Natural History Museum, London","Cadenas en South Kensington":{c:["Pret a Manger","Sandwich"]},
+ "Boxpark Wembley":{c:["Boxpark","Street food"]},"Abbey Road Shop":"Abbey Road Studios","Planta de chuches de Hamleys":{c:["Pick and mix","Candy"]},
+ "Kingly Court":"Carnaby Street","Beigel Bake":{c:[["Beigel Bake Brick Lane","Beigel"],"Bagel"]},"Brick Lane Coffee":{c:["Flat white","Coffee"]},
+ "Buck Street Market":{c:[["Buck Street Market Camden","Buck Street"],"Camden Market"]},"Camden Lock Market":{c:["Camden Lock","Camden Market"]},"Poppies":"Fish and chips",
+ "Dishoom King's Cross":{c:[["Dishoom restaurant","Dishoom"],"Naan"]},"Coal Drops Yard":{c:["Coal Drops Yard","King's Cross Central"]},
+ "Princess Louise":{c:[["Princess Louise pub Holborn","Holborn"],"Pub"]},"Harrods Food Halls":"Harrods","Cadenas de King's Road":{c:["Pret a Manger","Sandwich"]},
+ "Backlot Café":{c:["Butterbeer","Warner Bros. Studio Tour London"]},"The Anchor Bankside":{c:[["The Anchor Bankside pub","Anchor"],"Bankside"]},
+ "Cafés de Leadenhall Market":"Leadenhall Market","Ye Olde Cheshire Cheese":"Ye Olde Cheshire Cheese"
+};
 const WAPI="https://en.wikipedia.org/w/api.php?format=json&origin=*&redirects=1&";
 const BAD=/logo|map|plan|icon|flag|coat|arms_of|diagram|locator|location|\.svg|signature|seal|crest|wikidata|commons-logo|question_book/i;
-const PH=LS.get("ldn-ph",{});
-async function wikiPhotos(id){
+const PH=LS.get("ldn-ph2",{});
+// Cada sitio puede tener varias alternativas: si la primera no da foto, se prueba la siguiente.
+// "Título exacto" o ["búsqueda", "palabra que debe salir en el título"].
+function cands(w){ if(!w) return []; if(typeof w==="string") return [w]; if(w.c) return w.c; return [w]; }
+async function wikiOne(c,light){
+  let title=typeof c==="string"?c:null;
+  if(!title){
+    const r=await fetch(WAPI+"action=query&list=search&srlimit=5&srsearch="+encodeURIComponent(c[0])); const j=await r.json();
+    const hit=(j.query&&j.query.search||[]).find(x=>x.title.toLowerCase().includes(c[1].toLowerCase()));
+    if(!hit) return null; title=hit.title;
+  }
+  const reqs=[fetch(WAPI+"action=query&prop=pageimages|info&inprop=url&piprop=thumbnail&pithumbsize="+(light?400:1000)+"&titles="+encodeURIComponent(title)).then(r=>r.json())];
+  reqs.push(fetch(WAPI+"action=query&generator=images&gimlimit=40&prop=imageinfo&iiprop=url|mime|size&iiurlwidth="+(light?400:900)+"&titles="+encodeURIComponent(title)).then(r=>r.json()));
+  const [a,b]=await Promise.all(reqs);
+  const page=Object.values(a.query&&a.query.pages||{})[0]||{};
+  if(page.missing!==undefined) return null;
+  const gal=Object.values(b.query&&b.query.pages||{}).map(p=>({t:p.title,i:(p.imageinfo||[])[0]})).filter(x=>x.i&&x.i.mime==="image/jpeg"&&x.i.width>=600&&x.i.width>=x.i.height*0.9&&!BAD.test(x.t)).map(x=>x.i.thumburl).slice(0,light?2:8);
+  let main=page.thumbnail&&page.thumbnail.source; if(main&&/\.svg|\.png/i.test(main)) main=null; // fuera logos y mapas
+  const list=[...new Set([main,...gal].filter(Boolean))];
+  return list.length?{page:page.fullurl||("https://en.wikipedia.org/wiki/"+encodeURIComponent(title)),list}:null;
+}
+async function wikiPhotos(id,light){
   if(PH[id]!==undefined) return PH[id];
-  const w=WT[id]; if(!w||IS_ART) return null;
+  const w=id.startsWith("eat:")?EW[id.slice(4)]:WT[id]; if(!w||IS_ART) return null;
   try{
-    let title=Array.isArray(w)?null:w;
-    if(!title){
-      const r=await fetch(WAPI+"action=query&list=search&srlimit=3&srsearch="+encodeURIComponent(w[0])); const j=await r.json();
-      const hit=(j.query&&j.query.search||[]).find(x=>x.title.toLowerCase().includes(w[1].toLowerCase()));
-      if(!hit){PH[id]=null;LS.set("ldn-ph",PH);return null;} title=hit.title;
-    }
-    const [a,b]=await Promise.all([
-      fetch(WAPI+"action=query&prop=pageimages|info&inprop=url&piprop=thumbnail&pithumbsize=1000&titles="+encodeURIComponent(title)).then(r=>r.json()),
-      fetch(WAPI+"action=query&generator=images&gimlimit=40&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=900&titles="+encodeURIComponent(title)).then(r=>r.json())
-    ]);
-    const page=Object.values(a.query&&a.query.pages||{})[0]||{};
-    const gal=Object.values(b.query&&b.query.pages||{}).map(p=>({t:p.title,i:(p.imageinfo||[])[0]})).filter(x=>x.i&&x.i.mime==="image/jpeg"&&x.i.width>=700&&x.i.width>=x.i.height*0.9&&!BAD.test(x.t)).map(x=>x.i.thumburl).slice(0,8);
-    const main=page.thumbnail&&page.thumbnail.source;
-    const list=[...new Set([main,...gal].filter(Boolean))];
-    PH[id]=list.length?{page:page.fullurl||("https://en.wikipedia.org/wiki/"+encodeURIComponent(title)),list}:null;
-    LS.set("ldn-ph",PH); return PH[id];
+    let res=null;
+    for(const c of cands(w)){ res=await wikiOne(c,light); if(res) break; }
+    PH[id]=res; LS.set("ldn-ph2",PH); return res;
   }catch(e){ return undefined; } // sin conexión: no se guarda, se reintenta luego
 }
 function showPhotos(st,data){
@@ -658,11 +692,11 @@ function showPhotos(st,data){
   }
 }
 async function preloadPhotos(btn,out){
-  const ids=[...new Set(DAYS.flatMap(D=>D.steps).filter(s=>s.k!=="t"&&WT[s.id]).map(s=>s.id))];
+  const ids=[...new Set(DAYS.flatMap(D=>D.steps).filter(s=>WT[s.id]).map(s=>s.id)),...Object.keys(EW).map(k=>"eat:"+k)];
   let n=0, ok=0, imgs=0, fail=0;
   for(const id of ids){
     if(PH[id]===null) delete PH[id]; // reintentar los que no encontraron foto
-    const d=await wikiPhotos(id);
+    const d=await wikiPhotos(id,id.startsWith("eat:"));
     if(d===undefined) fail++;
     if(d){ ok++; const r=await Promise.all(d.list.slice(0,4).map(u=>new Promise(res=>{const i=new Image();i.onload=()=>res(1);i.onerror=()=>res(0);i.src=u;}))); imgs+=r.reduce((a,b)=>a+b,0); }
     n++; btn.textContent=`Descargando… ${n}/${ids.length}`;
