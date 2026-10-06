@@ -1,56 +1,65 @@
-FOTOS DE LA APP
-================
-Guarda cada foto en la carpeta img/ con EXACTAMENTE este nombre (en minúsculas, .jpg).
-Si una foto no está, la app enseña el dibujo. Mejor en horizontal y de menos de 500 KB.
+FOTOS PROPIAS (opcional)
+========================
+La app ya busca fotos sola en Wikipedia. Si queréis poner una foto vuestra en un sitio,
+guardadla en esta carpeta img/ con EXACTAMENTE este nombre (.jpg, mejor en horizontal y < 500 KB).
+Vuestra foto tiene prioridad sobre la de Wikipedia.
 
-Vie 9 · Río, Westminster y West End
-  park-hotel-ilford.jpg                      ← Park Hotel Ilford
-  borough-market.jpg                         ← Borough Market
-  south-bank.jpg                             ← South Bank
-  london-eye.jpg                             ← London Eye
-  big-ben-y-westminster.jpg                  ← Big Ben y Westminster
-  st-james-s-park.jpg                        ← St James's Park
-  buckingham-palace.jpg                      ← Buckingham Palace
-  trafalgar-square.jpg                       ← Trafalgar Square
-  covent-garden-y-neal-s-yard.jpg            ← Covent Garden y Neal's Yard
-  chinatown-y-soho.jpg                       ← Chinatown y Soho
-  piccadilly-circus.jpg                      ← Piccadilly Circus
-  lamb-y-flag.jpg                            ← Lamb & Flag
-  outernet-london.jpg                        ← Outernet London
-  westminster-de-noche.jpg                   ← Westminster de noche
+Vie 9 · Pixar, Westminster y West End
+  park-hotel-ilford.jpg                        ← Park Hotel Ilford
+  borough-market.jpg                           ← Borough Market
+  south-bank.jpg                               ← South Bank
+  estadio-de-wembley.jpg                       ← Estadio de Wembley
+  mundo-pixar-experience.jpg                   ← Mundo Pixar Experience
+  buckingham-palace.jpg                        ← Buckingham Palace
+  st-james-s-park.jpg                          ← St James's Park
+  trafalgar-square.jpg                         ← Trafalgar Square
+  covent-garden-y-neal-s-yard.jpg              ← Covent Garden y Neal's Yard
+  chinatown-y-soho.jpg                         ← Chinatown y Soho
+  piccadilly-circus.jpg                        ← Piccadilly Circus
+  mym-s-world-y-lego-store.jpg                 ← M&M's World y LEGO Store
+  lamb-y-flag.jpg                              ← Lamb & Flag
+  outernet-london.jpg                          ← Outernet London
+  westminster-de-noche.jpg                     ← Westminster de noche
+  leake-street-graffiti-tunnel.jpg             ← Leake Street Graffiti Tunnel
 
-Sáb 10 · Notting Hill, Pixar y Camden
-  casas-de-colores-de-notting-hill.jpg       ← Casas de colores de Notting Hill
-  portobello-road-market.jpg                 ← Portobello Road Market
-  the-churchill-arms.jpg                     ← The Churchill Arms
-  kensington-gardens-y-hyde-park.jpg         ← Kensington Gardens y Hyde Park
-  natural-history-museum.jpg                 ← Natural History Museum
-  boxpark-wembley.jpg                        ← Boxpark Wembley
-  mundo-pixar-experience.jpg                 ← Mundo Pixar Experience
-  camden-market.jpg                          ← Camden Market
-  hansel-y-gretel-y-regent-s-canal.jpg       ← Hansel & Gretel y Regent's Canal
-  primrose-hill.jpg                          ← Primrose Hill
-  poppies-fish-y-chips.jpg                   ← Poppies Fish & Chips
-  the-hawley-arms.jpg                        ← The Hawley Arms
-  camden-de-noche.jpg                        ← Camden de noche
+Sáb 10 · Notting Hill, Kensington y Camden
+  casas-de-colores-de-notting-hill.jpg         ← Casas de colores de Notting Hill
+  portobello-road-market.jpg                   ← Portobello Road Market
+  the-hummingbird-bakery.jpg                   ← The Hummingbird Bakery
+  the-churchill-arms.jpg                       ← The Churchill Arms
+  kensington-gardens-y-hyde-park.jpg           ← Kensington Gardens y Hyde Park
+  natural-history-museum.jpg                   ← Natural History Museum
+  harrods.jpg                                  ← Harrods
+  chelsea-king-s-road.jpg                      ← Chelsea · King's Road
+  peggy-porschen.jpg                           ← Peggy Porschen
+  abbey-road.jpg                               ← Abbey Road
+  primrose-hill.jpg                            ← Primrose Hill
+  camden-market.jpg                            ← Camden Market
+  hansel-y-gretel-y-regent-s-canal.jpg         ← Hansel & Gretel y Regent's Canal
+  poppies-fish-y-chips.jpg                     ← Poppies Fish & Chips
+  the-hawley-arms.jpg                          ← The Hawley Arms
+  camden-de-noche.jpg                          ← Camden de noche
 
-Dom 11 · King's Cross, Harrods y Harry Potter
-  anden-9.jpg                                ← Andén 9¾
-  st-pancras.jpg                             ← St Pancras
-  british-museum.jpg                         ← British Museum
-  harrods.jpg                                ← Harrods
-  chelsea-king-s-road.jpg                    ← Chelsea · King's Road
-  warner-bros-studio-tour.jpg                ← Warner Bros. Studio Tour
-  the-anchor-bankside.jpg                    ← The Anchor Bankside
-  tower-bridge-iluminado.jpg                 ← Tower Bridge iluminado
+Dom 11 · King's Cross, Soho y Harry Potter
+  anden-9.jpg                                  ← Andén 9¾
+  st-pancras.jpg                               ← St Pancras
+  british-museum.jpg                           ← British Museum
+  hamleys.jpg                                  ← Hamleys
+  liberty-y-carnaby-street.jpg                 ← Liberty y Carnaby Street
+  comida-en-kingly-court.jpg                   ← Comida en Kingly Court
+  warner-bros-studio-tour.jpg                  ← Warner Bros. Studio Tour
+  the-anchor-bankside.jpg                      ← The Anchor Bankside
+  tower-bridge-iluminado.jpg                   ← Tower Bridge iluminado
 
 Lun 12 · La City y vuelta a casa
-  check-out.jpg                              ← Check-out
-  torre-de-londres.jpg                       ← Torre de Londres
-  tower-bridge-y-shad-thames.jpg             ← Tower Bridge y Shad Thames
-  st-dunstan-in-the-east.jpg                 ← St Dunstan in the East
-  the-garden-at-120.jpg                      ← The Garden at 120
-  rascacielos-y-leadenhall-market.jpg        ← Rascacielos y Leadenhall Market
-  one-new-change-y-st-paul-s.jpg             ← One New Change y St Paul's
-  millennium-bridge.jpg                      ← Millennium Bridge
-  ye-olde-cheshire-cheese.jpg                ← Ye Olde Cheshire Cheese
+  check-out.jpg                                ← Check-out
+  beigel-bake.jpg                              ← Beigel Bake
+  street-art-de-brick-lane-y-shoreditch.jpg    ← Street art de Brick Lane y Shoreditch
+  torre-de-londres.jpg                         ← Torre de Londres
+  tower-bridge-y-shad-thames.jpg               ← Tower Bridge y Shad Thames
+  st-dunstan-in-the-east.jpg                   ← St Dunstan in the East
+  the-garden-at-120.jpg                        ← The Garden at 120
+  rascacielos-y-leadenhall-market.jpg          ← Rascacielos y Leadenhall Market
+  one-new-change-y-st-paul-s.jpg               ← One New Change y St Paul's
+  millennium-bridge.jpg                        ← Millennium Bridge
+  ye-olde-cheshire-cheese.jpg                  ← Ye Olde Cheshire Cheese

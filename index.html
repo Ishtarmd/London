@@ -198,6 +198,23 @@ details.planb p{margin:6px 0 0}
 .kv b{font-variant-numeric:tabular-nums;text-align:right}
 .phr{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
 .phr b{color:var(--ink-strong)}
+.post img.wiki{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s}
+.post img.wiki.ok{opacity:1}
+.post .credit{position:absolute;right:10px;bottom:36px;z-index:2;font-size:10px;color:#fff;opacity:.85;text-decoration:none;background:rgba(0,0,0,.3);padding:2px 7px;border-radius:999px}
+.gal{display:flex;gap:6px;overflow-x:auto;margin-top:12px;padding-bottom:2px;scrollbar-width:none}
+.gal::-webkit-scrollbar{display:none}
+.gal button{all:unset;cursor:pointer;flex:none;width:76px;height:56px;border-radius:10px;overflow:hidden;background:var(--chip);outline-offset:2px}
+.gal button img{width:100%;height:100%;object-fit:cover;display:block}
+.gal button[aria-pressed="true"]{outline:3px solid var(--day)}
+.notes{margin-top:12px}
+.notes summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--muted);list-style:none}
+.notes summary::-webkit-details-marker{display:none}
+.notes textarea{display:block;width:100%;box-sizing:border-box;margin-top:8px;min-height:72px;font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px}
+.sweet{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.sweet .when{font-family:var(--font-display);font-weight:800;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sweet button{all:unset;cursor:pointer;font-weight:700;color:var(--ink-strong)}
+.prog{height:8px;border-radius:4px;background:var(--chip);overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;background:var(--ok);width:0}
 .fade{animation:fade .28s ease}
 @keyframes fade{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.fade{animation:none}.stop span{transition:none}}
@@ -310,6 +327,11 @@ function scene(cat){
 }
 
 
+
+G.art='<path d="M58 30h20v10H58z"/><path d="M62 40v38h12V40"/><path d="M60 30v-6h16v6"/><path d="M84 30c8-4 14 2 22-2M84 40c10-2 18 6 30 0M84 50c8 0 14 6 26 2"/><circle cx="118" cy="64" r="3" fill="#fff"/><circle cx="104" cy="72" r="2" fill="#fff"/>';
+G.crossing='<path d="M30 70h100"/><path d="M40 78h12l4-16H44zM62 78h12l4-16H66zM84 78h12l4-16H88zM106 78h12l4-16h-12z"/><circle cx="56" cy="26" r="4"/><path d="M56 30v14l-5 12M56 44l5 12M56 34l-6 6M56 34l6 6"/><circle cx="76" cy="26" r="4"/><path d="M76 30v14l-5 12M76 44l5 12M76 34l-6 6M76 34l6 6"/><circle cx="96" cy="26" r="4"/><path d="M96 30v14l-5 12M96 44l5 12M96 34l-6 6M96 34l6 6"/><circle cx="116" cy="26" r="4"/><path d="M116 30v14l-5 12M116 44l5 12M116 34l-6 6M116 34l6 6"/>';
+SC.art=["#ff5a5f","#3b1d8f"]; SC.crossing=["#3a3a3a","#121212"];
+CATNAME.art="Arte urbano"; CATNAME.crossing="Música";
 const DAYS=[
 {w:"Vie",n:9,color:"#DC241F",title:"Río, Westminster y West End",steps:[
  {t:"07:30",c:"plane",k:"t",name:"Vuelo Faro → Stansted",where:"Ryanair · llegada 10:20",desc:"Arranca el viaje. Portugal y Londres tienen la misma hora, así que no hay que tocar el reloj.",tip:"Solo equipaje de mano: salís rápido. Tened el pasaporte a mano para el control."},
@@ -321,45 +343,53 @@ const DAYS=[
  {t:"16:30",c:"eye",name:"London Eye",where:"South Bank · junto a Westminster Bridge",desc:"La noria de 135 m que se ha convertido en símbolo de la ciudad. Desde abajo se ve el Parlamento al otro lado del río.",tip:"Subir es de pago y sale más barato online. Si no subís, la foto desde el puente es la buena.",q:"London Eye"},
  {t:"16:45",c:"bigben",name:"Big Ben y Westminster",where:"Westminster Bridge · Parliament Square",desc:"Cruzáis el puente hasta el Parlamento, la torre del Big Ben y la Abadía de Westminster, donde se coronan los reyes.",q:"Big Ben London"},
  {t:"17:15",c:"park",name:"St James's Park",where:"Entre Westminster y Buckingham",desc:"El parque real más bonito del centro, con un lago con pelícanos y ardillas que se acercan. Desde el puente del lago se ve Buckingham entre los árboles.",q:"St James's Park London"},
- {t:"17:35",c:"palace",name:"Buckingham Palace",where:"Final de The Mall",desc:"La residencia oficial del rey. Si la bandera real ondea, él está dentro. Después bajáis por The Mall, la avenida roja, hasta el Admiralty Arch.",q:"Buckingham Palace"},
+ {t:"17:35",c:"palace",name:"Buckingham Palace",where:"Final de The Mall",desc:"La residencia oficial del rey. Si la bandera real ondea, él está dentro. Si la bandera real ondea, él está dentro. Después bajáis por The Mall, la avenida roja, hasta el Admiralty Arch.",q:"Buckingham Palace"},
  {t:"18:05",c:"square",name:"Trafalgar Square",where:"Columna de Nelson · National Gallery",desc:"La gran plaza de Londres con sus cuatro leones de bronce. La pilláis justo al atardecer (~18:25).",q:"Trafalgar Square"},
  {t:"18:30",c:"market",name:"Covent Garden y Neal's Yard",where:"West End",desc:"Mercado cubierto con artistas callejeros. A 5 min está Neal's Yard, un patio escondido de fachadas de colores, y Seven Dials.",tip:"Postre: <b>Ben's Cookies</b>, las galletas calientes más famosas de Londres.",q:"Neal's Yard London"},
  {t:"19:30",c:"food",name:"Chinatown y Soho",where:"Gerrard St · Lisle St",desc:"Cena de picoteo barato bajo los farolillos rojos: <b>Bun House</b>, con bollos al vapor rellenos, y <b>Bunsik</b>, con street food coreano y corn dogs.",q:"Bun House Chinatown London"},
- {t:"20:30",c:"lights",name:"Piccadilly Circus",where:"West End",desc:"Las pantallas gigantes de Piccadilly encendidas de noche. Seguid por Leicester Square y Carnaby Street.",q:"Piccadilly Circus"},
+ {t:"20:30",c:"lights",name:"Piccadilly Circus",where:"West End",desc:"Las pantallas gigantes de Piccadilly encendidas de noche. Subid un momento por Regent Street hasta Carnaby Street y el edificio de estilo Tudor de <b>Liberty</b>, precioso iluminado.",q:"Piccadilly Circus"},
+ {t:"20:50",c:"sweets",name:"M&M's World y LEGO Store",where:"Leicester Square · a 3 min",desc:"Dos tiendas enfrente una de la otra. M&M's World tiene cuatro plantas con paredes de bolitas de colores de todos los sabores; en la LEGO Store hay un vagón del metro y el Big Ben hechos de piezas.",tip:"Coged bolsa y elegid colores en la pared de M&M's (se paga al peso). Mirad la hora de cierre en Maps, suelen abrir hasta tarde.",q:"M&M's World London"},
  {t:"21:15",c:"pub",name:"Lamb & Flag",where:"Covent Garden · Rose Street",desc:"Uno de los pubs más antiguos del West End, metido en un callejón. Los viernes está lleno de gente tomando la pinta de pie en la calle.",tip:"Alternativa: The Sherlock Holmes, junto a Trafalgar.",q:"Lamb and Flag Covent Garden"},
  {t:"22:15",c:"screens",name:"Outernet London",where:"Tottenham Court Road",desc:"Salas forradas de pantallas LED gigantes con contenido inmersivo. Es gratis, abre hasta tarde y no se parece a nada.",q:"Outernet London"},
- {t:"22:45",c:"night",name:"Westminster de noche",where:"Whitehall → Westminster Bridge → South Bank",desc:"Unos 25 min andando para ver el Big Ben y el Parlamento iluminados y el London Eye encendido. Es una de las mejores vistas nocturnas de Londres.",q:"Westminster Bridge"},
- {t:"00:00",c:"tube",k:"t",name:"Vuelta en Night Tube",where:"Viernes: Jubilee y Central toda la noche",desc:"Volvéis por Gants Hill, a 13 min del hotel. Llegáis hacia la 1:00.",tip:"Antes de las ~00:25 también vale el Elizabeth line desde Tottenham Court Rd (dir. Shenfield) hasta Ilford. De madrugada la Central pasa cada ~20 min.",route:[["s","Westminster"],["jubilee","dir. Stratford · ~20 min"],["s","Stratford"],["central","dir. Hainault vía Newbury Park · ~12 min"],["s","Gants Hill"],["walk","13 min"],["s","Park Hotel"]]}
+ {t:"22:45",c:"night",name:"Westminster de noche",where:"Whitehall → Westminster Bridge → South Bank",desc:"Bajáis por Whitehall (~20 min) para ver el Big Ben y el Parlamento iluminados y el London Eye encendido. Es una de las mejores vistas nocturnas de Londres.",q:"Westminster Bridge"},
+ {t:"23:30",c:"art",name:"Leake Street Graffiti Tunnel",where:"Bajo la estación de Waterloo · gratis",desc:"Un túnel de 300 m bajo las vías de Waterloo donde el grafiti es legal: las paredes cambian cada semana y de noche hay artistas pintando. Está a 5 min del London Eye.",tip:"Entrada por Lower Marsh o por York Road. Es una calle pública, pero id juntos y sin entreteneros mucho a esas horas.",q:"Leake Street Arches"},
+ {t:"00:00",c:"tube",k:"t",name:"Vuelta en Night Tube",where:"Sábado: Northern y Central toda la noche",desc:"Llegáis al hotel hacia la 1:00.",tip:"De madrugada la Northern solo va por el ramal Charing Cross. Antes de las ~00:25, en TCR podéis coger el Elizabeth (dir. Shenfield) hasta Ilford.",route:[["s","Camden Town"],["northern","ramal Charing Cross · 5 paradas"],["s","Tottenham Court Rd"],["central","dir. Hainault vía Newbury Park · ~30 min"],["s","Gants Hill"],["walk","13 min"],["s","Park Hotel"]]}
 ]},
 {w:"Sáb",n:10,color:"#2563C9",title:"Notting Hill, Pixar y Camden",steps:[
  {t:"07:30",c:"tube",k:"t",name:"Hacia Notting Hill",where:"~50 min puerta a puerta",desc:"Salida temprano: el mercadillo de Portobello se llena a media mañana.",route:[["s","Ilford"],["eliz","dir. Paddington/Heathrow · ~30 min"],["s","Bond Street"],["central","dir. West Ruislip/Ealing B. · 4 paradas"],["s","Notting Hill Gate"]]},
  {t:"08:40",c:"houses",name:"Casas de colores de Notting Hill",where:"Lancaster Rd · St Luke's Mews · Elgin Crescent",desc:"Las calles de casitas pastel que salen en la película. A primera hora están casi vacías y hay buena luz para las fotos.",q:"St Luke's Mews Notting Hill"},
  {t:"09:15",c:"market",name:"Portobello Road Market",where:"Notting Hill",desc:"El sábado es el día grande: en la parte sur de la calle hay cientos de puestos de antigüedades, platería y cámaras viejas, y más arriba fruta y comida.",tip:"Desayunad en algún puesto. Buscad la tienda roja de <b>Alice's</b> y la librería azul de la peli.",q:"Portobello Road Market"},
+ {t:"10:05",c:"sweets",name:"The Hummingbird Bakery",where:"Portobello Road · la tienda original",desc:"La pastelería americana donde empezó la moda de los cupcakes en Londres, abierta en Portobello en 2004. Su especialidad es el cupcake red velvet.",tip:"Para llevar y comerlo paseando hacia el Churchill Arms.",q:"Hummingbird Bakery Portobello Road"},
  {t:"10:30",c:"pub",name:"The Churchill Arms",where:"Kensington Church Street",desc:"El pub cubierto de flores, seguramente el más fotografiado de Londres. Abre sobre las 11:00, así que hoy es parada para la foto.",q:"The Churchill Arms Kensington"},
  {t:"10:45",c:"park",name:"Kensington Gardens y Hyde Park",where:"Palacio de Kensington · Albert Memorial",desc:"Cruzáis el parque pasando por el Palacio de Kensington, el estanque Round Pond y el Albert Memorial dorado, hasta el Royal Albert Hall.",q:"Albert Memorial London"},
  {t:"11:20",c:"museum",name:"Natural History Museum",where:"South Kensington · gratis",desc:"Una catedral victoriana llena de dinosaurios. En la Hintze Hall cuelga el esqueleto de una ballena azul, y hay sala de volcanes y simulador de terremotos.",tip:"Gratis, pero reservad franja online (~11:15–11:30) para entrar sin cola.",q:"Natural History Museum London"},
- {t:"12:45",c:"tube",k:"t",name:"Rumbo a Wembley",where:"~40 min",desc:"Dos líneas y estáis en el estadio.",route:[["s","South Kensington"],["picc","dir. Cockfosters · 3 paradas"],["s","Green Park"],["jubilee","dir. Stanmore · ~22 min"],["s","Wembley Park"]]},
- {t:"13:30",c:"food",name:"Boxpark Wembley",where:"Junto al estadio de Wembley",desc:"Contenedores de street food de todo tipo, rápido y a buen precio. Foto con el estadio.",q:"Boxpark Wembley"},
- {t:"14:30",c:"balloon",name:"Mundo Pixar Experience",where:"Fulton Rd, Wembley Park · 5 min de la estación",desc:"La exposición inmersiva de Pixar más grande del mundo: 14 universos a tamaño real, del cuarto de Andy al Monstruos S.A., con olores y música en cada sala. Se recorre en 45–55 min.",tip:"<b>Reservad la franja de las 14:30.</b> Solo se vende online.",q:"Mundo Pixar Experience Wembley"},
- {t:"15:30",c:"tube",k:"t",name:"De Wembley a Camden",where:"~40 min",desc:"Metropolitan hasta el centro y dos paradas de Northern.",route:[["s","Wembley Park"],["metro","dir. Aldgate · ~18 min"],["s","Euston Square"],["walk","3 min"],["s","Euston"],["northern","dir. Edgware o High Barnet · 2 paradas"],["s","Camden Town"]]},
- {t:"16:15",c:"market",name:"Camden Market",where:"Stables · Camden Lock · Buck Street",desc:"El Londres alternativo: ropa vintage y punk en antiguos establos de caballos, el callejón de los paraguas y la estatua de Amy Winehouse.",tip:"Los puestos de ropa cierran sobre las 18:00–19:00; la comida y los bares siguen abiertos.",q:"Stables Market Camden"},
- {t:"17:15",c:"sweets",name:"Hansel & Gretel y Regent's Canal",where:"Camden Lock",desc:"Una tienda de dulces de cuento y, al lado, el canal con barcazas pintadas y la esclusa de Camden Lock.",q:"Camden Lock"},
- {t:"18:00",c:"sunset",name:"Primrose Hill",where:"15 min a pie desde Camden",desc:"Una colina con todo el skyline de Londres delante. El atardecer es hacia las 18:20.",q:"Primrose Hill viewpoint"},
- {t:"19:15",c:"food",name:"Poppies Fish & Chips",where:"Camden · Hawley Crescent",desc:"El fish & chips clásico del viaje, con decoración de los años 50.",q:"Poppies Fish and Chips Camden"},
- {t:"20:30",c:"pub",name:"The Hawley Arms",where:"Camden",desc:"Pub rockero mítico de Camden, al que iba Amy Winehouse. Ambiente joven los sábados.",tip:"Alternativa: The Good Mixer.",q:"The Hawley Arms Camden"},
+ {t:"12:50",c:"shop",name:"Harrods",where:"Knightsbridge · 10 min a pie del museo",desc:"Los grandes almacenes más famosos del mundo. No os perdáis los Food Halls, la escalera egipcia ni la planta de juguetes.",tip:"Evitad mochilas grandes.",q:"Harrods London"},
+ {t:"13:40",c:"houses",name:"Chelsea · King's Road",where:"Sloane Square",desc:"El barrio elegante: Sloane Street, Sloane Square y King's Road, con callejuelas de casitas de colores.",tip:"Los sábados hay mercado de comida en <b>Duke of York Square</b>, junto a Sloane Square: buen sitio para comer.",q:"King's Road Chelsea"},
+ {t:"14:35",c:"sweets",name:"Peggy Porschen",where:"116 Ebury Street, Belgravia · de camino a Victoria",desc:"La pastelería rosa más fotografiada de Londres, con la fachada cubierta de flores. Tartas, cupcakes y bebidas decoradas en tonos pastel.",tip:"Los fines de semana hay cola para sentarse: pedid para llevar. Está de camino a la estación de Victoria.",q:"Peggy Porschen Belgravia"},
+ {t:"15:00",c:"tube",k:"t",name:"Hacia Wembley",where:"~40 min",desc:"Victoria line una parada y la Jubilee directa hasta el estadio.",tip:"Llegad 15–20 min antes de vuestra hora a Mundo Pixar.",route:[["s","Peggy Porschen"],["walk","8 min"],["s","Victoria"],["victoria","dir. Walthamstow · 1 parada"],["s","Green Park"],["jubilee","dir. Stanmore · ~22 min"],["s","Wembley Park"]]},
+ {t:"15:55",c:"bigben",name:"Estadio de Wembley",where:"Wembley Way · a 5 min de la estación",desc:"Bajando por Wembley Way aparece el estadio de la selección inglesa, con su arco blanco de 133 m. Foto rápida antes de Pixar.",q:"Wembley Stadium"},
+ {t:"16:30",c:"balloon",name:"Mundo Pixar Experience",where:"Fulton Rd, Wembley Park · 5 min de la estación",desc:"La exposición inmersiva de Pixar más grande del mundo: 14 universos a tamaño real, del cuarto de Andy al Monstruos S.A., con olores y música en cada sala. Se recorre en 45–55 min.",tip:"<b>Sesión de las 16:30 del sábado.</b> Solo se vende online.",q:"Mundo Pixar Experience Wembley"},
+ {t:"17:30",c:"tube",k:"t",name:"De Wembley a Abbey Road",where:"~15 min",desc:"Directos en la Jubilee, sin transbordos.",route:[["s","Wembley Park"],["jubilee","dir. Stratford · 5 paradas · ~12 min"],["s","St John's Wood"],["walk","6 min por Grove End Road"],["s","Abbey Road"]]},
+ {t:"17:50",c:"crossing",name:"Abbey Road",where:"St John's Wood · paso de cebra de los Beatles",desc:"El paso de cebra de la portada del disco <i>Abbey Road</i> (1969). Al lado están los estudios donde grabaron los Beatles, y en el muro de la entrada la gente deja mensajes escritos.",tip:"Es una calle con tráfico real: haced la foto por turnos y sin pararos en medio. Los estudios no se visitan por dentro.",q:"Abbey Road crossing"},
+ {t:"18:05",c:"tube",k:"t",name:"Paseo hasta Camden",where:"~35 min a pie pasando por Primrose Hill",desc:"Se va andando por calles residenciales y se cruza Primrose Hill, con el skyline de Londres a la vista.",tip:"Si llueve o vais cansados: bus o Uber hasta Camden Town (~10 min).",route:[["s","Abbey Road"],["walk","~20 min"],["s","Primrose Hill"],["walk","~15 min"],["s","Camden Town"]]},
+ {t:"18:20",c:"sunset",name:"Primrose Hill",where:"De camino a Camden",desc:"Una colina con todo el skyline de Londres delante: el Shard, la City y el BT Tower. Llegáis justo para el atardecer (~18:20).",q:"Primrose Hill viewpoint"},
+ {t:"18:45",c:"market",name:"Camden Market",where:"Stables · Camden Lock · Buck Street",desc:"El Londres alternativo: ropa vintage y punk en antiguos establos de caballos, el callejón de los paraguas y la estatua de Amy Winehouse.",tip:"Los puestos de ropa cierran sobre las 18:00–19:00, así que id primero a lo que más os interese. La comida y los bares siguen abiertos.",q:"Stables Market Camden"},
+ {t:"19:25",c:"sweets",name:"Hansel & Gretel y Regent's Canal",where:"Camden Lock",desc:"Una tienda de dulces de cuento y, al lado, el canal con barcazas pintadas y la esclusa de Camden Lock.",q:"Camden Lock"},
+ {t:"19:50",c:"food",name:"Poppies Fish & Chips",where:"Camden · Hawley Crescent",desc:"El fish & chips clásico del viaje, con decoración de los años 50.",q:"Poppies Fish and Chips Camden"},
+ {t:"21:00",c:"pub",name:"The Hawley Arms",where:"Camden",desc:"Pub rockero mítico de Camden, al que iba Amy Winehouse. Ambiente joven los sábados.",tip:"Alternativa: The Good Mixer.",q:"The Hawley Arms Camden"},
  {t:"22:00",c:"night",name:"Camden de noche",where:"Camden High St · Chalk Farm Rd",desc:"Bares con música en directo y el canal iluminado. Sin prisa: los sábados el metro funciona toda la noche.",q:"Camden High Street"},
  {t:"00:00",c:"tube",k:"t",name:"Vuelta en Night Tube",where:"Sábado: Northern y Central toda la noche",desc:"Llegáis al hotel hacia la 1:00.",tip:"De madrugada la Northern solo va por el ramal Charing Cross. Antes de las ~00:25, en TCR podéis coger el Elizabeth (dir. Shenfield) hasta Ilford.",route:[["s","Camden Town"],["northern","ramal Charing Cross · 5 paradas"],["s","Tottenham Court Rd"],["central","dir. Hainault vía Newbury Park · ~30 min"],["s","Gants Hill"],["walk","13 min"],["s","Park Hotel"]]}
 ]},
-{w:"Dom",n:11,color:"#6950A1",title:"King's Cross, Harrods y Harry Potter",steps:[
+{w:"Dom",n:11,color:"#6950A1",title:"King's Cross, Soho y Harry Potter",steps:[
  {t:"07:50",c:"tube",k:"t",name:"Hacia King's Cross",where:"~40 min",desc:"Temprano para hacer la foto del andén sin cola.",route:[["s","Ilford"],["eliz","dir. Paddington/Heathrow · ~22 min"],["s","Farringdon"],["circle","1 parada (cualquiera de las tres)"],["s","King's Cross St Pancras"]]},
  {t:"08:35",c:"wizard",name:"Andén 9¾",where:"Estación de King's Cross",desc:"El carrito que atraviesa la pared, con bufandas de las cuatro casas para la foto, y la tienda oficial al lado.",tip:"Si no hay cola, la foto es gratis. Más tarde la cola puede ser larga.",q:"Platform 9 3/4 King's Cross"},
  {t:"09:00",c:"station",name:"St Pancras",where:"Al lado de King's Cross",desc:"La estación más bonita de Londres: ladrillo rojo neogótico y una nave de hierro y cristal donde llega el Eurostar. Dentro está la estatua gigante de la pareja abrazándose.",q:"St Pancras International"},
  {t:"10:00",c:"museum",name:"British Museum",where:"Bloomsbury · 20 min a pie · gratis",desc:"Dos millones de años de historia: la Piedra de Rosetta, las momias egipcias, los frisos del Partenón y el Gran Atrio con techo de cristal.",tip:"Abre a las 10:00. La franja gratis online ayuda a entrar antes.",q:"British Museum"},
- {t:"11:30",c:"tube",k:"t",name:"Hacia Harrods",where:"~15 min",desc:"Directo en Piccadilly.",route:[["s","Russell Square"],["picc","dir. Heathrow/Uxbridge · 7 paradas"],["s","Knightsbridge"]]},
- {t:"11:50",c:"shop",name:"Harrods",where:"Knightsbridge · domingo desde ~11:30",desc:"Los grandes almacenes más famosos del mundo. No os perdáis los Food Halls, la escalera egipcia ni la planta de juguetes.",tip:"Evitad mochilas grandes.",q:"Harrods London"},
- {t:"12:40",c:"houses",name:"Chelsea · King's Road",where:"Sloane Square",desc:"El barrio elegante: Sloane Street, Sloane Square y King's Road, con callejuelas de casitas de colores.",tip:"Comida rápida en King's Road hacia las 13:15.",q:"King's Road Chelsea"},
- {t:"14:05",c:"tube",k:"t",name:"Hacia Euston",where:"~25 min",desc:"Rumbo al tren de Harry Potter.",route:[["s","Sloane Square"],["district","o Circle · dir. este · 1 parada"],["s","Victoria"],["victoria","dir. Walthamstow · 4 paradas"],["s","Euston"]]},
- {t:"14:45",c:"tube",k:"t",name:"Tren a Watford Junction",where:"~20 min · vale el contactless",desc:"Coged el directo de London Northwestern (en las pantallas pone Watford Junction).",tip:"El Overground también va a Watford, pero tarda más del doble.",route:[["s","Euston"],["lnwr","directo · ~20 min"],["s","Watford Junction"],["shuttle","incluida en la entrada · ~15 min"],["s","Studio Tour"]]},
+ {t:"11:40",c:"shop",name:"Hamleys",where:"Regent Street · domingo de 12:00 a 18:00",desc:"La juguetería más antigua del mundo (1760): siete plantas con dependientes haciendo demostraciones, un mundo de LEGO y una planta entera de chuches.",tip:"Paseo desde el British Museum por Soho Square y Carnaby Street (~20 min). Si llegáis antes de las 12:00, empezad por Liberty.",q:"Hamleys Regent Street"},
+ {t:"12:30",c:"shop",name:"Liberty y Carnaby Street",where:"Great Marlborough Street",desc:"Grandes almacenes de 1924 en un edificio de estilo Tudor con madera de barcos antiguos por dentro. Al lado, Carnaby Street, la calle de la moda de los años 60.",q:"Liberty London"},
+ {t:"13:05",c:"food",name:"Comida en Kingly Court",where:"Junto a Carnaby Street",desc:"Un patio de tres plantas lleno de restaurantes de precio medio: hamburguesas, ramen, tacos, pizza…",q:"Kingly Court"},
+ {t:"13:55",c:"tube",k:"t",name:"Hacia Euston",where:"~10 min",desc:"Tres paradas de Victoria line. Llegáis con margen para el tren.",route:[["s","Oxford Circus"],["victoria","dir. Walthamstow · 3 paradas"],["s","Euston"]]},
+ {t:"14:15",c:"tube",k:"t",name:"Tren a Watford Junction",where:"~20 min · vale el contactless",desc:"Coged el directo de London Northwestern (en las pantallas pone Watford Junction).",tip:"El Overground también va a Watford, pero tarda más del doble.",route:[["s","Euston"],["lnwr","directo · ~20 min"],["s","Watford Junction"],["shuttle","incluida en la entrada · ~15 min"],["s","Studio Tour"]]},
  {t:"16:30",c:"wizard",name:"Warner Bros. Studio Tour",where:"The Making of Harry Potter · entrada 16:30",desc:"Los decorados reales de las películas: el Gran Comedor, el Callejón Diagon, el andén con el Expreso de Hogwarts y la maqueta gigante del castillo. Coincide con la temporada Dark Arts.",tip:"Llegad 20–30 min antes. Probad la cerveza de mantequilla. Calculad 3–3,5 h.",q:"Warner Bros Studio Tour London"},
  {t:"20:15",c:"tube",k:"t",name:"Vuelta a Londres",where:"Directos al río",desc:"Lanzadera, tren y Northern hasta London Bridge.",route:[["s","Studio Tour"],["shuttle",""],["s","Watford Junction"],["lnwr","~20 min"],["s","Euston"],["northern","ramal Bank (via Bank) · ~12 min"],["s","London Bridge"]]},
  {t:"21:30",c:"pub",name:"The Anchor Bankside",where:"Orilla sur, junto a Southwark Bridge",desc:"Pub histórico a orillas del Támesis, perfecto para cenar mirando la City.",tip:"Si ya cenasteis en Harry Potter, pasad directamente al paseo.",q:"The Anchor Bankside"},
@@ -368,14 +398,17 @@ const DAYS=[
 ]},
 {w:"Lun",n:12,color:"#E07A10",title:"La City y vuelta a casa",steps:[
  {t:"07:30",c:"hotel",name:"Check-out",where:"Park Hotel",desc:"Dejad las maletas en recepción (pedidlo el primer día). Volvéis a por ellas a las ~15:00.",q:"Park Hotel Ilford 327 Cranbrook Road"},
- {t:"07:45",c:"tube",k:"t",name:"Hacia la Torre de Londres",where:"~30 min",desc:"Coged la District en Whitechapel, porque la Hammersmith & City no para en Tower Hill.",route:[["s","Ilford"],["eliz","dir. Paddington/Heathrow · 5 paradas"],["s","Whitechapel"],["district","dir. oeste · 2 paradas"],["s","Tower Hill"]]},
- {t:"08:15",c:"tower",name:"Torre de Londres",where:"Tower Hill",desc:"Fortaleza de casi 1.000 años donde se guardan las Joyas de la Corona y viven los cuervos. Se rodea por fuera junto al foso.",q:"Tower of London"},
- {t:"08:45",c:"bridge",name:"Tower Bridge y Shad Thames",where:"Cruce a pie",desc:"Cruzáis el puente y bajáis a Shad Thames, antiguos almacenes unidos por pasarelas de hierro. Desde ahí se ven el Shard y la City.",q:"Shad Thames"},
- {t:"09:30",c:"garden",name:"St Dunstan in the East",where:"A 5 min de la Torre · gratis",desc:"Un jardín dentro de una iglesia bombardeada en la Segunda Guerra Mundial, con enredaderas entre los arcos góticos. Un rincón muy bonito y poco conocido.",q:"St Dunstan in the East"},
- {t:"10:00",c:"sky",name:"The Garden at 120",where:"120 Fenchurch St · planta 15",desc:"Azotea con jardín, gratis y sin reserva, con vistas a la Torre, Tower Bridge, el Shard y el Walkie-Talkie. Sustituye al Sky Garden, que está agotado.",tip:"Si os sale una cancelación en <b>Horizon 22</b> (planta 58, el mirador gratis más alto), id allí.",q:"The Garden at 120 Fenchurch Street"},
- {t:"10:45",c:"sky",name:"Rascacielos y Leadenhall Market",where:"La City",desc:"Ruta entre el Gherkin, el edificio Lloyd's y el Cheesegrater hasta Leadenhall Market, el mercado victoriano que sale como Callejón Diagon en la primera peli de Harry Potter.",q:"Leadenhall Market"},
- {t:"11:45",c:"dome",name:"One New Change y St Paul's",where:"Terraza gratis en la azotea",desc:"Subid a la terraza del centro comercial One New Change: tenéis la cúpula de St Paul's enfrente. Luego dad la vuelta a la catedral (entrar es de pago).",q:"One New Change roof terrace"},
- {t:"12:25",c:"bridge",name:"Millennium Bridge",where:"St Paul's ↔ Tate Modern",desc:"El puente peatonal de acero desde el que se hace la foto clásica de St Paul's.",q:"Millennium Bridge London"},
+ {t:"07:40",c:"tube",k:"t",name:"Hacia Brick Lane",where:"~30 min",desc:"Desayuno en el East End antes de la Torre.",route:[["s","Ilford"],["eliz","dir. Paddington/Heathrow · ~15 min"],["s","Liverpool Street"],["walk","12 min"],["s","Brick Lane"]]},
+ {t:"08:10",c:"food",name:"Beigel Bake",where:"159 Brick Lane · abierto 24 h",desc:"La panadería de bagels más famosa de Londres, abierta día y noche desde hace décadas. El de <b>salt beef</b> (ternera en salazón con mostaza y pepinillo) cuesta unas 7 £ y es una institución.",tip:"Hay cola pero va rápida: llevad el pedido pensado. Probad también un <i>Eccles cake</i> o el strudel de manzana.",q:"Beigel Bake Brick Lane"},
+ {t:"08:35",c:"art",name:"Street art de Brick Lane y Shoreditch",where:"Brick Lane · Hanbury St · Fashion St",desc:"Las calles del East End están llenas de murales enormes que cambian continuamente. Pasad por Hanbury Street, Fashion Street y la nave victoriana de Old Spitalfields Market (a esta hora aún cerrado).",q:"Brick Lane street art"},
+ {t:"09:05",c:"tube",k:"t",name:"Hacia la Torre de Londres",where:"~15 min",desc:"Coged la District, porque la Hammersmith & City no para en Tower Hill.",route:[["s","Brick Lane"],["walk","8 min"],["s","Aldgate East"],["district","dir. oeste · 2 paradas"],["s","Tower Hill"]]},
+ {t:"09:25",c:"tower",name:"Torre de Londres",where:"Tower Hill",desc:"Fortaleza de casi 1.000 años donde se guardan las Joyas de la Corona y viven los cuervos. Se rodea por fuera junto al foso.",q:"Tower of London"},
+ {t:"09:50",c:"bridge",name:"Tower Bridge y Shad Thames",where:"Cruce a pie",desc:"Cruzáis el puente y bajáis a Shad Thames, antiguos almacenes unidos por pasarelas de hierro. Desde ahí se ven el Shard y la City.",q:"Shad Thames"},
+ {t:"10:35",c:"garden",name:"St Dunstan in the East",where:"A 5 min de la Torre · gratis",desc:"Un jardín dentro de una iglesia bombardeada en la Segunda Guerra Mundial, con enredaderas entre los arcos góticos. Un rincón muy bonito y poco conocido.",q:"St Dunstan in the East"},
+ {t:"10:50",c:"sky",name:"The Garden at 120",where:"120 Fenchurch St · planta 15",desc:"Azotea con jardín, gratis y sin reserva, con vistas a la Torre, Tower Bridge, el Shard y el Walkie-Talkie. Sustituye al Sky Garden, que está agotado.",tip:"Si os sale una cancelación en <b>Horizon 22</b> (planta 58, el mirador gratis más alto), id allí.",q:"The Garden at 120 Fenchurch Street"},
+ {t:"11:25",c:"sky",name:"Rascacielos y Leadenhall Market",where:"La City",desc:"Ruta entre el Gherkin, el edificio Lloyd's y el Cheesegrater hasta Leadenhall Market, el mercado victoriano que sale como Callejón Diagon en la primera peli de Harry Potter.",q:"Leadenhall Market"},
+ {t:"12:05",c:"dome",name:"One New Change y St Paul's",where:"Terraza gratis en la azotea",desc:"Subid a la terraza del centro comercial One New Change: tenéis la cúpula de St Paul's enfrente. Luego dad la vuelta a la catedral (entrar es de pago).",q:"One New Change roof terrace"},
+ {t:"12:35",c:"bridge",name:"Millennium Bridge",where:"St Paul's ↔ Tate Modern",desc:"El puente peatonal de acero desde el que se hace la foto clásica de St Paul's.",q:"Millennium Bridge London"},
  {t:"12:55",c:"pub",name:"Ye Olde Cheshire Cheese",where:"Fleet Street",desc:"Pub reconstruido tras el Gran Incendio de 1666, con salas oscuras de madera por las que pasaron Dickens y otros escritores. Es de Samuel Smith's, de lo más barato del centro.",tip:"Pie o fish &amp; chips y pinta de despedida.",q:"Ye Olde Cheshire Cheese"},
  {t:"14:15",c:"tube",k:"t",name:"Vuelta a por las maletas",where:"~40 min",desc:"Recoged las maletas hacia las 15:00.",route:[["walk","12 min"],["s","Farringdon"],["eliz","dir. Shenfield · ~20 min"],["s","Ilford"],["walk","13 min"],["s","Park Hotel"]]},
  {t:"15:58",c:"tube",k:"t",name:"Tren a Southend Airport",where:"Trainline · llegada 17:03",desc:"Estad en el andén de Ilford hacia las 15:40. La estación de Southend Airport está pegada a la terminal.",tip:"El cambio es en <b>Shenfield</b>. Os bajáis en Southend Airport, una parada antes de Southend Victoria.",route:[["s","Ilford"],["eliz","dir. Shenfield"],["s","Shenfield"],["ga","dir. Southend Victoria"],["s","Southend Airport"]]},
@@ -395,7 +428,7 @@ const X={
  "buckingham-palace":{ll:[51.5014,-0.1419],rain:"Foto rápida y seguid. Si arrecia, refugio en la <b>National Gallery</b> (gratis), en Trafalgar."},
  "trafalgar-square":{ll:[51.5080,-0.1281],rain:"La <b>National Gallery</b> está en la misma plaza: gratis, con Van Gogh, Turner y Velázquez."},
  "covent-garden-y-neal-s-yard":{ll:[51.5144,-0.1265],rain:"El mercado de Covent Garden es cubierto y <b>Seven Dials Market</b> es un food hall interior a 5 min.",eat:[["Seven Dials Market","Food hall cubierto, mucha variedad","Seven Dials Market"],["Ben's Cookies","Galletas calientes","Ben's Cookies Covent Garden"]]},
- "chinatown-y-soho":{ll:[51.5115,-0.1312],eat:[["Bun House","Bollos al vapor","Bun House Chinatown"],["Bunsik","Corn dogs coreanos","Bunsik Soho"],["Four Seasons","Pato asado cantonés","Four Seasons Gerrard Street"],["Kingly Court","Patio con muchos restaurantes","Kingly Court"]]},
+ "chinatown-y-soho":{ll:[51.5115,-0.1312],eat:[["Bun House","Bollos al vapor","Bun House Chinatown"],["Bunsik","Corn dogs coreanos","Bunsik Soho"],["Four Seasons","Pato asado cantonés","Four Seasons Gerrard Street"],["Flat Iron (Covent Garden)","Filete a buen precio","Flat Iron Covent Garden"]]},
  "piccadilly-circus":{ll:[51.5101,-0.1340]},
  "lamb-y-flag":{ll:[51.5116,-0.1257],opt:1},
  "outernet-london":{ll:[51.5162,-0.1307],opt:1},
@@ -405,8 +438,18 @@ const X={
  "the-churchill-arms":{ll:[51.5069,-0.1946],opt:1},
  "kensington-gardens-y-hyde-park":{ll:[51.5024,-0.1777],rain:"Metro de Notting Hill Gate a South Kensington (Circle/District, 2 paradas). Desde la estación, un <b>túnel peatonal</b> lleva hasta el museo sin mojarse."},
  "natural-history-museum":{ll:[51.4967,-0.1764],eat:[["Cafés del museo","Rápido sin salir","Natural History Museum cafe"],["Cadenas en South Kensington","Pret, Leon, Itsu junto a la estación","South Kensington station"]]},
- "boxpark-wembley":{ll:[51.5585,-0.2818],eat:[["Boxpark Wembley","Street food variado","Boxpark Wembley"]]},
+ "estadio-de-wembley":{ll:[51.5560,-0.2796],opt:1,eat:[["Boxpark Wembley","Street food junto al estadio","Boxpark Wembley"]]},
  "mundo-pixar-experience":{ll:[51.5594,-0.2830]},
+ "mym-s-world-y-lego-store":{ll:[51.5104,-0.1307],opt:1,rain:"Es interior: perfecto si llueve."},
+ "leake-street-graffiti-tunnel":{ll:[51.5019,-0.1149],opt:1,rain:"Es un túnel cubierto: si llueve, mejor que el paseo por el río."},
+ "the-hummingbird-bakery":{ll:[51.5131,-0.2033],opt:1},
+ "abbey-road":{ll:[51.5320,-0.1773],eat:[["Abbey Road Shop","Tienda oficial junto a los estudios","Abbey Road Shop"]]},
+ "peggy-porschen":{ll:[51.4917,-0.1513],opt:1},
+ "hamleys":{ll:[51.5128,-0.1404],rain:"Todo es interior.",eat:[["Planta de chuches de Hamleys","Golosinas a granel","Hamleys Regent Street"]]},
+ "liberty-y-carnaby-street":{ll:[51.5136,-0.1400],opt:1},
+ "comida-en-kingly-court":{ll:[51.5125,-0.1393],eat:[["Kingly Court","Patio con muchos restaurantes","Kingly Court"],["Flat Iron (Beak St)","Filete a buen precio","Flat Iron Beak Street"]]},
+ "beigel-bake":{ll:[51.5246,-0.0718],eat:[["Beigel Bake","Bagel de salt beef ~7 £, 24 h","Beigel Bake Brick Lane"],["Brick Lane Coffee","Café para llevar","Brick Lane coffee"]]},
+ "street-art-de-brick-lane-y-shoreditch":{ll:[51.5205,-0.0717],opt:1,rain:"Old Spitalfields Market está cubierto (los lunes abre a las 10:00)."},
  "camden-market":{ll:[51.5415,-0.1466],rain:"El <b>Stables Market</b> es cubierto en gran parte, y en <b>Hawley Wharf</b> hay food halls interiores.",eat:[["Buck Street Market","Contenedores de comida, terraza arriba","Buck Street Market"],["Camden Lock Market","Puestos internacionales","Camden Lock Market"]]},
  "hansel-y-gretel-y-regent-s-canal":{ll:[51.5410,-0.1455],opt:1,rain:"Tienda sí, canal no: quedaos bajo techo en Camden Lock."},
  "primrose-hill":{ll:[51.5394,-0.1609],opt:1,rain:"Saltadlo: con nubes bajas no se ve el skyline. Más tiempo en Camden."},
@@ -432,7 +475,7 @@ const X={
 };
 const KEY=[ // eventos con cuenta atrás (hora de Londres)
  {d:9, t:"07:30",e:"✈️",n:"Vuelo Faro → Stansted"},
- {d:10,t:"14:30",e:"🎈",n:"Mundo Pixar"},
+ {d:10,t:"16:30",e:"🎈",n:"Mundo Pixar"},
  {d:11,t:"16:30",e:"⚡",n:"Harry Potter"},
  {d:12,t:"15:58",e:"🚆",n:"Tren a Southend Airport"},
  {d:12,t:"20:05",e:"✈️",n:"Vuelo Southend → Faro"}
@@ -455,6 +498,7 @@ let state=LS.get("ldn-pos",{d:0,i:0}); if(!DAYS[state.d]||!DAYS[state.d].steps[s
 const h0=(location.hash||"").replace("#",""); if(/^dia[1-4]$/.test(h0)) state={d:+h0[3]-1,i:0};
 let view="ruta";
 let visited=new Set(LS.get("ldn-visited",[]));
+let notes=LS.get("ldn-notes",{});
 let WX=LS.get("ldn-wx",null);
 function save(){LS.set("ldn-pos",state);}
 
@@ -536,20 +580,99 @@ function renderRoute(){
     ${st.where?`<div class="where">${st.where}${st.opt?" · <b>opcional</b>":""}</div>`:""}
     ${late?`<div class="box late">⏱️ <b>Vais unos ${late.min} min tarde</b> respecto al plan.${late.skip.length?` Para recuperar tiempo, podéis saltaros: <b>${late.skip.join(", ")}</b>.`:""}</div>`:""}
     <p class="desc">${st.desc}</p>
+    ${isLeg?"":`<div class="gal" id="gal" hidden></div>`}
     ${st.tip?`<div class="box tip">${st.tip}</div>`:""}
     ${st.rain?`<details class="box planb" ${wet?"open":""}><summary>☔ Plan B si llueve${wet?` · lluvia probable (${hw.p}%)`:""}</summary><p>${st.rain}</p></details>`:""}
     ${st.route?routeHTML(st.route):""}
     ${st.eat?`<div class="eat"><h4>🍴 Cerca para comer o beber</h4>${st.eat.map(e=>`<a href="${placeUrl(e[2])}" target="_blank" rel="noopener"><b>${e[0]}</b><span>${e[1]}</span></a>`).join("")}</div>`:""}
     ${!isLeg?`<div class="actions">
      <a class="act primary" href="${mapsUrl(st)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Cómo llegar</a>
-     <a class="act" href="${photosUrl(st)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Ver fotos</a></div>`:""}
+     <a class="act" href="${photosUrl(st)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Ver fotos</a></div>
+    <details class="notes" ${notes[st.id]?"open":""}><summary>📝 Notas${notes[st.id]?" ·  guardadas":""}</summary><textarea id="noteTa" placeholder="Qué os ha gustado, qué habéis comprado, a quién le debéis una pinta…">${esc(notes[st.id]||"")}</textarea></details>`:""}
    </div></article>`;
+  const ta=$("noteTa"); if(ta) ta.oninput=()=>{ notes[st.id]=ta.value; if(!ta.value) delete notes[st.id]; LS.set("ldn-notes",notes); };
+  if(!isLeg&&WT[st.id]){ const c=PH[st.id]; if(c!==undefined) showPhotos(st,c); else wikiPhotos(st.id).then(d=>showPhotos(st,d)); }
   const vb=$("visitBtn"); if(vb) vb.onclick=()=>{ visited.has(st.id)?visited.delete(st.id):visited.add(st.id); LS.set("ldn-visited",[...visited]); if(visited.has(st.id)) toast("Marcado como visitado ✓"); renderTube(); renderRoute(); };
   const nextStep=D.steps[state.i+1];
   $("prev").disabled=state.d===0&&state.i===0;
   if(nextStep){$("nextLbl").textContent=`Siguiente · ${nextStep.t}`;$("nextName").textContent=nextStep.name;$("next").disabled=false;}
   else if(state.d<DAYS.length-1){$("nextLbl").textContent="Siguiente día";$("nextName").textContent=`${DAYS[state.d+1].w} ${DAYS[state.d+1].n} · ${DAYS[state.d+1].title}`;$("next").disabled=false;}
   else {$("nextLbl").textContent="Fin del viaje";$("nextName").textContent="¡Buen vuelo! ✈";$("next").disabled=true;}
+}
+
+/* ================== fotos (Wikipedia / Wikimedia Commons) ================== */
+// título exacto del artículo en la Wikipedia inglesa, o [búsqueda, palabra que debe aparecer en el título encontrado]
+const WT={
+ "borough-market":"Borough Market","south-bank":"Tate Modern","estadio-de-wembley":"Wembley Stadium","st-james-s-park":"St James's Park",
+ "buckingham-palace":"Buckingham Palace","trafalgar-square":"Trafalgar Square","covent-garden-y-neal-s-yard":"Covent Garden","chinatown-y-soho":"Chinatown, London",
+ "piccadilly-circus":"Piccadilly Circus","mym-s-world-y-lego-store":"Leicester Square","lamb-y-flag":["Lamb and Flag Covent Garden pub","Lamb"],"outernet-london":["Outernet London","Outernet"],
+ "westminster-de-noche":"Palace of Westminster","leake-street-graffiti-tunnel":["Leake Street graffiti tunnel","Leake"],
+ "casas-de-colores-de-notting-hill":"Notting Hill","portobello-road-market":"Portobello Road","the-hummingbird-bakery":["Hummingbird Bakery London","Hummingbird"],
+ "the-churchill-arms":["Churchill Arms Kensington pub","Churchill Arms"],"kensington-gardens-y-hyde-park":"Kensington Gardens","natural-history-museum":"Natural History Museum, London",
+ "harrods":"Harrods","chelsea-king-s-road":"King's Road","peggy-porschen":["Peggy Porschen","Porschen"],"abbey-road":"Abbey Road","primrose-hill":"Primrose Hill",
+ "camden-market":"Camden Market","hansel-y-gretel-y-regent-s-canal":"Regent's Canal","the-hawley-arms":["Hawley Arms Camden","Hawley"],"camden-de-noche":"Camden Town",
+ "anden-9":"King's Cross railway station","st-pancras":"St Pancras railway station","british-museum":"British Museum","hamleys":"Hamleys","liberty-y-carnaby-street":"Liberty (department store)",
+ "comida-en-kingly-court":"Carnaby Street","warner-bros-studio-tour":"Warner Bros. Studio Tour London","the-anchor-bankside":["The Anchor Bankside pub","Anchor"],"tower-bridge-iluminado":"Tower Bridge",
+ "beigel-bake":["Beigel Bake Brick Lane","Beigel"],"street-art-de-brick-lane-y-shoreditch":"Brick Lane","torre-de-londres":"Tower of London","tower-bridge-y-shad-thames":"Shad Thames",
+ "st-dunstan-in-the-east":"St Dunstan-in-the-East","the-garden-at-120":"120 Fenchurch Street","rascacielos-y-leadenhall-market":"Leadenhall Market",
+ "one-new-change-y-st-paul-s":"St Paul's Cathedral","millennium-bridge":"Millennium Bridge, London","ye-olde-cheshire-cheese":"Ye Olde Cheshire Cheese"
+};
+const IS_ART=false; // versión del enlace de Claude: allí no se pueden cargar fotos externas
+const WAPI="https://en.wikipedia.org/w/api.php?format=json&origin=*&redirects=1&";
+const BAD=/logo|map|plan|icon|flag|coat|arms_of|diagram|locator|location|\.svg|signature|seal|crest|wikidata|commons-logo|question_book/i;
+const PH=LS.get("ldn-ph",{});
+async function wikiPhotos(id){
+  if(PH[id]!==undefined) return PH[id];
+  const w=WT[id]; if(!w||IS_ART) return null;
+  try{
+    let title=Array.isArray(w)?null:w;
+    if(!title){
+      const r=await fetch(WAPI+"action=query&list=search&srlimit=3&srsearch="+encodeURIComponent(w[0])); const j=await r.json();
+      const hit=(j.query&&j.query.search||[]).find(x=>x.title.toLowerCase().includes(w[1].toLowerCase()));
+      if(!hit){PH[id]=null;LS.set("ldn-ph",PH);return null;} title=hit.title;
+    }
+    const [a,b]=await Promise.all([
+      fetch(WAPI+"action=query&prop=pageimages|info&inprop=url&piprop=thumbnail&pithumbsize=1000&titles="+encodeURIComponent(title)).then(r=>r.json()),
+      fetch(WAPI+"action=query&generator=images&gimlimit=40&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=900&titles="+encodeURIComponent(title)).then(r=>r.json())
+    ]);
+    const page=Object.values(a.query&&a.query.pages||{})[0]||{};
+    const gal=Object.values(b.query&&b.query.pages||{}).map(p=>({t:p.title,i:(p.imageinfo||[])[0]})).filter(x=>x.i&&x.i.mime==="image/jpeg"&&x.i.width>=700&&x.i.width>=x.i.height*0.9&&!BAD.test(x.t)).map(x=>x.i.thumburl).slice(0,8);
+    const main=page.thumbnail&&page.thumbnail.source;
+    const list=[...new Set([main,...gal].filter(Boolean))];
+    PH[id]=list.length?{page:page.fullurl||("https://en.wikipedia.org/wiki/"+encodeURIComponent(title)),list}:null;
+    LS.set("ldn-ph",PH); return PH[id];
+  }catch(e){ return undefined; } // sin conexión: no se guarda, se reintenta luego
+}
+function showPhotos(st,data){
+  if(!data||DAYS[state.d].steps[state.i]!==st) return;
+  const post=document.querySelector("#v-ruta .post"); if(!post||post.querySelector("img.wiki")) return;
+  const img=document.createElement("img"); img.className="wiki"; img.alt=st.name; img.decoding="async";
+  img.onload=()=>{img.classList.add("ok");post.classList.add("has-photo");}; img.onerror=()=>img.remove();
+  img.src=data.list[0];
+  post.insertBefore(img,post.querySelector("img.photo")||post.querySelector(".time"));
+  const cr=document.createElement("a"); cr.className="credit"; cr.href=data.page; cr.target="_blank"; cr.rel="noopener"; cr.textContent="Foto: Wikimedia Commons"; post.appendChild(cr);
+  if(data.list.length>1){
+    const g=$("gal"); if(!g) return;
+    g.innerHTML=data.list.map((u,k)=>`<button type="button" data-k="${k}" aria-pressed="${k===0}" aria-label="Foto ${k+1}"><img src="${u}" alt="" loading="lazy" onerror="this.parentNode.remove()"></button>`).join("");
+    g.hidden=false;
+    g.onclick=e=>{const b=e.target.closest("button"); if(!b) return; img.classList.remove("ok"); img.src=data.list[+b.dataset.k]; g.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));};
+  }
+}
+async function preloadPhotos(btn,out){
+  const ids=[...new Set(DAYS.flatMap(D=>D.steps).filter(s=>s.k!=="t"&&WT[s.id]).map(s=>s.id))];
+  let n=0, ok=0, imgs=0, fail=0;
+  for(const id of ids){
+    if(PH[id]===null) delete PH[id]; // reintentar los que no encontraron foto
+    const d=await wikiPhotos(id);
+    if(d===undefined) fail++;
+    if(d){ ok++; const r=await Promise.all(d.list.slice(0,4).map(u=>new Promise(res=>{const i=new Image();i.onload=()=>res(1);i.onerror=()=>res(0);i.src=u;}))); imgs+=r.reduce((a,b)=>a+b,0); }
+    n++; btn.textContent=`Descargando… ${n}/${ids.length}`;
+  }
+  btn.disabled=false;
+  if(ok===0){ btn.textContent="Reintentar"; out.innerHTML=`<b>No se ha podido descargar ninguna foto.</b> Comprueba que tienes internet${fail?" (Wikipedia no responde)":""} y vuelve a intentarlo.`; return; }
+  btn.textContent="Fotos guardadas ✓";
+  out.innerHTML=`${ok} de ${ids.length} sitios con foto · ${imgs} fotos guardadas en el móvil.${fail?` ${fail} sitios fallaron: pulsa otra vez para reintentar.`:""}`;
+  toast("Fotos guardadas para usar sin internet");
 }
 
 /* ================== mapa ================== */
@@ -646,7 +769,7 @@ function renderGastos(){
 }
 
 /* ================== info ================== */
-const RES=[["vie 9 · 07:30","Ryanair Faro → Stansted","ryan"],["vie 9 · 11:05","National Express Stansted → Stratford","nx"],["vie 9–lun 12","Park Hotel Ilford","hotel"],["sáb 10 · 14:30","Mundo Pixar Experience","pixar"],["dom 11 · 16:30","Warner Bros. Studio Tour","hp"],["lun 12 · 15:58","Trainline Ilford → Southend Airport","train"],["lun 12 · 20:05","easyJet Southend → Faro","ezy"]];
+const RES=[["vie 9 · 07:30","Ryanair Faro → Stansted","ryan"],["vie 9 · 11:05","National Express Stansted → Stratford","nx"],["vie 9–lun 12","Park Hotel Ilford","hotel"],["sáb 10 · 16:30","Mundo Pixar Experience","pixar"],["dom 11 · 16:30","Warner Bros. Studio Tour","hp"],["lun 12 · 15:58","Trainline Ilford → Southend Airport","train"],["lun 12 · 20:05","easyJet Southend → Faro","ezy"]];
 function renderInfo(){
   const codes=LS.get("ldn-codes",{});
   $("v-info").innerHTML=`
@@ -685,9 +808,20 @@ function renderInfo(){
   <div class="sec"><h3>🗣️ Frases útiles</h3>
     ${[["Una pinta de cerveza, por favor","A pint of lager, please"],["Media pinta","A half, please"],["¿Puedo pagar con tarjeta?","Can I pay by card?"],["¿Dónde está la estación de metro?","Where's the tube station?"],["¿Este tren para en…?","Does this train stop at…?"],["Mesa para dos, por favor","A table for two, please"],["La cuenta, por favor","Could we have the bill, please?"],["Perdón (para pasar)","Sorry / Excuse me"],["¡Salud!","Cheers!"]].map(p=>`<div class="phr"><span>${p[0]}</span><b>${p[1]}</b></div>`).join("")}
   </div>
+  <div class="sec"><h3>🍰 Dulces y caprichos</h3>
+    ${DAYS.flatMap((D,d)=>D.steps.map((s,i)=>({D,d,i,s}))).filter(x=>x.s.c==="sweets"||/Ben's Cookies|Bread Ahead|donut|Eccles/i.test(x.s.desc+(x.s.tip||""))).map(x=>`<div class="sweet"><span class="when">${x.D.w} ${x.s.t}</span><button type="button" data-go2="${x.d}:${x.i}">${x.s.name}</button><span></span><span class="small muted">${x.s.where||""}</span></div>`).join("")}
+    <p class="small muted">También: donuts de Bread Ahead (Borough Market), Ben's Cookies (Covent Garden) y la planta de chuches de Hamleys.</p>
+  </div>
+  <div class="sec"><h3>📷 Fotos sin conexión</h3>
+    <p class="small muted" style="margin-top:-4px">Las fotos salen de Wikipedia. Pulsa una vez con wifi antes del viaje para tenerlas guardadas en el móvil.</p>
+    ${IS_ART?`<p class="small"><b>En este enlace no se pueden cargar fotos.</b> Funcionan en la versión instalada desde GitHub.</p>`:`<button class="btn" id="dlPh" type="button">Descargar todas las fotos</button><p class="small muted" id="dlOut" style="margin:8px 0 0"></p>`}
+  </div>
+  <div class="sec"><h3>✅ Progreso</h3>${(()=>{const all=DAYS.flatMap(D=>D.steps).filter(s=>s.k!=="t");const n=all.filter(s=>visited.has(s.id)).length;return `<p class="small muted" style="margin:-4px 0 0">${n} de ${all.length} sitios visitados.</p><div class="prog"><i style="width:${Math.round(n/all.length*100)}%"></i></div>`;})()}</div>
   <div class="sec"><h3>Visitados</h3><p class="small muted" style="margin-top:-4px">${visited.size} sitios marcados.</p><button class="btn sec2" id="resetV" type="button">Borrar marcas de visitado</button></div>`;
   $("v-info").querySelectorAll("[data-code]").forEach(inp=>inp.oninput=()=>{const c=LS.get("ldn-codes",{});c[inp.dataset.code]=inp.value;LS.set("ldn-codes",c);});
   $("copyAddr").onclick=async()=>{try{await navigator.clipboard.writeText("Park Hotel, 327 Cranbrook Road, Ilford IG1 4UE");toast("Dirección copiada");}catch(e){toast("Mantén pulsada la dirección para copiarla");}};
+  if($("dlPh")) $("dlPh").onclick=e=>{ e.target.disabled=true; preloadPhotos(e.target,$("dlOut")); };
+  $("v-info").querySelectorAll("[data-go2]").forEach(b=>b.onclick=()=>{ const [d,i]=b.dataset.go2.split(":").map(Number); view="ruta"; go(d,i); });
   let armed=false; $("resetV").onclick=e=>{ if(!armed){armed=true;e.target.textContent="Pulsa otra vez para confirmar";return;} visited=new Set();LS.set("ldn-visited",[]);toast("Marcas borradas");renderAll(); };
 }
 
